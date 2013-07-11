@@ -1,0 +1,41 @@
+Hack Night
+Go Sydney Meetup
+11 Jul 2013
+
+Dave Cheney
+Canonical
+dave@cheney.net
+http://dave.cheney.net/
+@davecheney
+
+Andrew Gerrand
+Google
+adg@golang.org
+@enneff
+
+* Agenda
+
+- 18:00 Setup, introductions
+- 18:30 Commence Hacking!!
+- 20:30 (ish) Presentations and wrap up
+- 21:00 Pub
+
+* What to work on
+
+Some suggestions:
+
+- Brad Fitzpatrick will be doing some Camlistore hacking.
+- Stennie from 10gen will be doing something with MongoDB.
+- If you're totally new to Go, install Go then work through the tour.
+- If you're still at a loss, consider this simple project (pto)
+
+* Webapp project
+
+Write a web application that asks the user for their name, then greets them.
+
+Bonus points (if that is too simple, or you finish early)
+- make you app run on appengine.
+- use an alternative framework like web.go, gorilla or revel.
+- use http.Fileserver to serve some static assets (favicon, css and js).
+- listen on more than one port.
+- use a templating package.
