@@ -1,0 +1,169 @@
+pdp11
+Go Sydney Meetup
+19 Feb 2014
+
+Dave Cheney
+dave@cheney.net
+http://dave.cheney.net/
+@davecheney
+
+* pdp11
+
+* What is this talk about
+
+- A bit of history
+
+- A bit of evangalism
+
+- A few tips
+
+- A few gotchas
+
+* Disclaimer
+
+This project has very little to do with the real world.
+
+* Why the PDP-11 ?
+
+.image pdp11/102680487-03-01.jpeg
+
+image courtesy of the Computer History Museum
+
+* Unix
+
+- This is important
+
+- Every computer you interact with today can trace itself back to the work of Ken and Dennis and the architectural style of the PDP-11.
+
+* Yup, Windows as well
+
+The PDP-11 was the predecessor to the VAX-11/780 whos VMS operating system formed the conceptual basis of Windows NT.
+
+.image pdp11/showstopper.jpg
+
+* Two simulators
+
+- Started as a Javascript simulator, [http://pdp11.aiju.de/]
+- Ported to Go, [https://github.com/davecheney/pdp11]
+- Ported to Arduino flavored C++, [https://github.com/davecheney/avr11]
+
+* Why rewrite the simulator in Go ?
+
+Go appears to be an excellent language for writing simulators
+
+- NES
+- TRS-80
+- ZX Spectrum
+- Quite a few 6502 implementations
+- (many) LISPs
+
+[http://dave.cheney.net/2013/01/09/go-the-language-for-emulators]
+
+* The documentation is fantastic
+
+.image pdp11/adc.png
+
+* Time marches on
+
+.image pdp11/cray1a.jpg
+
+* Resources, resources, resources
+
+- Bitsavers.org has every user manual, every reference manual, and most of the schematics for all of the DEC PDP line of computers. 
+
+- They also have disk images, tape images, everything you will need
+
+- DEC Diagnostics
+
+* Truth
+
+* 000001
+
+* An example
+
+- MOV
+
+- Takes two operands, source and destination
+
+- Each operand can be a constant, a register, a pointer, or and indirect pointer.
+
+- Encoded as x1SSDD
+
+* An example (cont.)
+
+- Move the lower byte in register 3 to register 4
+
+    MOV R3, R4 110304
+    MOV R3, R4 90c4
+    MOV R3, R4 37060
+
+[http://play.golang.org/p/N09KhM-4ql]
+
+* Some drawbacks
+
+    65535
+    0xffff
+    177777
+
+[http://play.golang.org/p/hqH-e8QuaG]
+
+* A cautionary tail
+
+.play pdp11/oops.go
+
+* Testing
+
+// pdp11
+
+    # LS -L
+    TOTAL 241
+    DRWXRWXR-X  2 BIN      1104 MAY 14 00:47 BIN
+    DRWXRWXR-X  2 BIN      1824 OCT 10 12:31 DEV
+    DRWXRWXR-X  2 BIN       496 OCT 10 12:32 ETC
+    -RWXRWXRWX  1 ROOT    29074 OCT 10 12:28 HPUNIX
+    DRWXRWXR-X  2 BIN       464 MAY 13 23:35 LIB
+    DRWXRWXR-X  2 BIN        32 MAY 13 20:01 MNT
+    -RWXRWXRWX  1 ROOT    28836 OCT 10 12:22 RKUNIX
+    -RWXRWXRWX  1 ROOT    29020 OCT 10 12:25 RPUNIX
+    DRWXRWXRWX  2 BIN       272 OCT 10 12:31 TMP
+    -RWXRWXRWX  1 ROOT    27312 OCT 10 12:31 UNIX
+    DRWXRWXR-X 14 BIN       224 MAY 13 20:16 USR
+
+* Testing
+
+// avr11
+
+    # LS -L
+    TOTAL 241
+    DRWXRWXR-X  2 BIN         0 MAY 14 00:47 BIN
+    DRWXRWXR-X  2 BIN         0 OCT 10 12:31 DEV
+    DRWXRWXR-X  2 BIN         0 OCT 10 12:32 ETC
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:28 HPUNIX
+    DRWXRWXR-X  2 BIN         0 MAY 13 23:35 LIB
+    DRWXRWXR-X  2 BIN         0 MAY 13 20:01 MNT
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:22 RKUNIX
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:25 RPUNIX
+
+Missing a carry bit somewhere
+
+* Coverage
+
+.code pdp11/coverage.txt
+
+* Coverage (cont.)
+
+.code pdp11/swab.go
+
+* Gotchas (part 1)
+
+`ADD()` contains a bug, what is it ?
+
+.code pdp11/add.go
+
+* Gotchas (part 2)
+
+.code pdp11/rk11.go
+
+* Gotchas (part 3)
+
+.code pdp11/mul.go
