@@ -101,6 +101,10 @@ Go appears to be an excellent language for writing simulators
 
 * Some drawbacks
 
+    255
+    0xff
+    377
+
     65535
     0xffff
     177777
@@ -154,6 +158,12 @@ Missing a carry bit somewhere
 
 .code pdp11/swab.go
 
+* Types
+
+Consider defining types for various data paths.
+
+.code pdp11/uint18.go
+
 * Gotchas (part 1)
 
 `ADD()` contains a bug, what is it ?
@@ -167,3 +177,16 @@ Missing a carry bit somewhere
 * Gotchas (part 3)
 
 .code pdp11/mul.go
+
+* Demo time
+
+.play pdp11/demo.go
+
+* Thank you
+
+Try it for yourself
+
+   go get -d github.com/davecheney/unix6
+   cd $GOPATH/src/github.com/davecheney/unix6
+   go build
+   ./unix6
