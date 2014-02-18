@@ -29,23 +29,17 @@ This project has very little to do with the real world.
 
 image courtesy of the Computer History Museum
 
-* Unix
+* Why the PDP-11 ?
 
-- This is important
+- Unix
 
 - Every computer you interact with today can trace itself back to the work of Ken and Dennis and the architectural style of the PDP-11.
 
 * Yup, Windows as well
 
-The PDP-11 was the predecessor to the VAX-11/780 whos VMS operating system formed the conceptual basis of Windows NT.
+The PDP-11 was the predecessor to the VAX-11/780 who's VMS operating system formed the conceptual basis of Windows NT.
 
 .image pdp11/showstopper.jpg
-
-* Two simulators
-
-- Started as a Javascript simulator, [http://pdp11.aiju.de/]
-- Ported to Go, [https://github.com/davecheney/pdp11]
-- Ported to Arduino flavored C++, [https://github.com/davecheney/avr11]
 
 * Why rewrite the simulator in Go ?
 
@@ -56,16 +50,13 @@ Go appears to be an excellent language for writing simulators
 - ZX Spectrum
 - Quite a few 6502 implementations
 - (many) LISPs
+- [http://dave.cheney.net/2013/01/09/go-the-language-for-emulators]
 
-[http://dave.cheney.net/2013/01/09/go-the-language-for-emulators]
+The Go simulator used as a basis for the Arduino version.
 
 * The documentation is fantastic
 
 .image pdp11/adc.png
-
-* Time marches on
-
-.image pdp11/cray1a.jpg
 
 * Resources, resources, resources
 
@@ -74,6 +65,10 @@ Go appears to be an excellent language for writing simulators
 - They also have disk images, tape images, everything you will need
 
 - DEC Diagnostics
+
+* Time marches on
+
+.image pdp11/cray1a.jpg
 
 * Truth
 
@@ -115,6 +110,49 @@ Go appears to be an excellent language for writing simulators
 
 .play pdp11/oops.go
 
+* The simulator
+
+* Actually two simulators
+
+- Started as a Javascript simulator, [http://pdp11.aiju.de/]
+- Ported to Go, [https://github.com/davecheney/pdp11]
+- Ported to Arduino flavored C++, [https://github.com/davecheney/avr11]
+
+* The process
+
+- Download the .js source 
+- One file at a time, transcribe function by function from .js to Go (surprisingly straight forward)
+- A few tricky bits
+- Console and Disk Drive used timers to simulate delays.
+- Traps (see later)
+- Once the simulator worked, iterate and refactor to make the code more idiomatic.
+
+- Bonus: fork the Go code and translate again into Arduino flavored C++
+
+* The main loop
+
+.code pdp11/loop.go
+
+* Types
+
+Consider defining types for various data paths.
+
+.code pdp11/uint18.go
+
+* Types (cont.)
+
+.code pdp11/regaddr.go
+
+* Traps
+
+The PDP-11 has interrupts and traps. Handling traps is a little tricky
+
+.code pdp11/trap.go /START1/,/END1/
+
+* Traps (cont.)
+
+.code pdp11/trap.go /START2/,/END2/
+
 * Testing
 
 // pdp11
@@ -133,7 +171,7 @@ Go appears to be an excellent language for writing simulators
     -RWXRWXRWX  1 ROOT    27312 OCT 10 12:31 UNIX
     DRWXRWXR-X 14 BIN       224 MAY 13 20:16 USR
 
-* Testing
+* Testing (cont.)
 
 // avr11
 
@@ -147,22 +185,39 @@ Go appears to be an excellent language for writing simulators
     DRWXRWXR-X  2 BIN         0 MAY 13 20:01 MNT
     -RWXRWXRWX  1 ROOT        0 OCT 10 12:22 RKUNIX
     -RWXRWXRWX  1 ROOT        0 OCT 10 12:25 RPUNIX
+    DRWXRWXRWX  2 BIN         0 OCT 10 12:31 TMP
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:31 UNIX
+    DRWXRWXR-X 14 BIN         0 MAY 13 20:16 USR
 
 Missing a carry bit somewhere
 
-* Coverage
+* Testing (cont.)
 
-.code pdp11/coverage.txt
+- The .js version, and my inital port was very monolithic.
+- cpu.step() was over 1,000 lines of switch statements, directly executed instructions
+- Execute synthetic commands to make sure the simulator doesn't barf
 
-* Coverage (cont.)
+.play pdp11/runtest.go
+
+* Testing (cont.)
+
+.code pdp11/pdp.txt
+
+* Instruction testing
+
+.code pdp11/cpu_test.go /START1 OMIT/,/END1 OMIT/
+
+* Instruction testing (cont.)
+
+.code pdp11/cpu_test.go /START2 OMIT/,/END2 OMIT/
+
+* Instruction testing (cont.)
+
+Adding helpers sometimes makes testing coverage harder.
 
 .code pdp11/swab.go
 
-* Types
-
-Consider defining types for various data paths.
-
-.code pdp11/uint18.go
+* Gotchas
 
 * Gotchas (part 1)
 
@@ -172,9 +227,13 @@ Consider defining types for various data paths.
 
 * Gotchas (part 2)
 
+What happens if `sector`, `surface`, and `cylinder` are declared as `uint16` ?
+
 .code pdp11/rk11.go
 
 * Gotchas (part 3)
+
+Will this code work on all platforms ?
 
 .code pdp11/mul.go
 
@@ -186,7 +245,5 @@ Consider defining types for various data paths.
 
 Try it for yourself
 
-   go get -d github.com/davecheney/unix6
-   cd $GOPATH/src/github.com/davecheney/unix6
-   go build
-   ./unix6
+   go get github.com/davecheney/unix6
+   $GOPATH/bin/unix6
