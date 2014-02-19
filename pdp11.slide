@@ -50,7 +50,7 @@ Go appears to be an excellent language for writing simulators
 - ZX Spectrum
 - Quite a few 6502 implementations
 - (many) LISPs
-- [http://dave.cheney.net/2013/01/09/go-the-language-for-emulators]
+- [[http://dave.cheney.net/2013/01/09/go-the-language-for-emulators][dave.cheney.net/2013/01/09/go-the-language-for-emulators]]
 
 The Go simulator used as a basis for the Arduino version.
 
@@ -92,7 +92,7 @@ The Go simulator used as a basis for the Arduino version.
     MOV R3, R4 90c4
     MOV R3, R4 37060
 
-[http://play.golang.org/p/N09KhM-4ql]
+[[http://play.golang.org/p/N09KhM-4ql][play.golang.org/p/N09KhM-4ql]]
 
 * Some drawbacks
 
@@ -104,7 +104,7 @@ The Go simulator used as a basis for the Arduino version.
     0xffff
     177777
 
-[http://play.golang.org/p/hqH-e8QuaG]
+[[http://play.golang.org/p/hqH-e8QuaG][/play.golang.org/p/hqH-e8QuaG]]
 
 * A cautionary tail
 
@@ -114,9 +114,9 @@ The Go simulator used as a basis for the Arduino version.
 
 * Actually two simulators
 
-- Started as a Javascript simulator, [http://pdp11.aiju.de/]
-- Ported to Go, [https://github.com/davecheney/pdp11]
-- Ported to Arduino flavored C++, [https://github.com/davecheney/avr11]
+- Started as a Javascript simulator, [[http://pdp11.aiju.de/][pdp11.aiju.de/]]
+- Ported to Go, [[https://github.com/davecheney/pdp11][github.com/davecheney/pdp11]]
+- Ported to Arduino flavored C++, [[https://github.com/davecheney/avr11][github.com/davecheney/avr11]]
 
 * The process
 
