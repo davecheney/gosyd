@@ -37,7 +37,11 @@ image courtesy of the Computer History Museum
 
 * Yup, Windows as well
 
-The PDP-11 was the predecessor to the VAX-11/780 who's VMS operating system formed the conceptual basis of Windows NT.
+- The PDP-11 was the predecessor to the VAX-11/780.
+
+- Dave Cutler, the author of VMS, the _other_ operating system for the 11/780 decamped to Microsoft after a struggle over the next generation of VAX hardware.
+
+- Cutler and VMS formed the conceptual basis of Windows NT.
 
 .image pdp11/showstopper.jpg
 
@@ -56,6 +60,8 @@ The Go simulator used as a basis for the Arduino version.
 
 * The documentation is fantastic
 
+Let's look at the ADC instruction.
+
 .image pdp11/adc.png
 
 * Resources, resources, resources
@@ -68,7 +74,11 @@ The Go simulator used as a basis for the Arduino version.
 
 * Time marches on
 
+This is the Cray-1a, an FPGA recreation of Seymour Cray's famous supercomputer. 
+
 .image pdp11/cray1a.jpg
+
+No copies of the Cray operating system exist today.
 
 * Truth
 
@@ -76,21 +86,23 @@ The Go simulator used as a basis for the Arduino version.
 
 * An example
 
-- MOV
+- MOV instruction
 
 - Takes two operands, source and destination
 
-- Each operand can be a constant, a register, a pointer, or and indirect pointer.
+- Each operand can be a constant, a register, a pointer, or and indirect pointer, encoded as part of the operand.
 
-- Encoded as x1SSDD
+- Encoded as x1SSDDA
+
+- SS/DD is 3 bits for the operand mode, and 3 bits for the register.
 
 * An example (cont.)
 
 - Move the lower byte in register 3 to register 4
 
-    MOV R3, R4 110304
-    MOV R3, R4 90c4
-    MOV R3, R4 37060
+    MOVB R3, R4 110304
+    MOVB R3, R4 90c4
+    MOVB R3, R4 37060
 
 [[http://play.golang.org/p/N09KhM-4ql][play.golang.org/p/N09KhM-4ql]]
 
@@ -103,6 +115,8 @@ The Go simulator used as a basis for the Arduino version.
     65535
     0xffff
     177777
+
+Octal works well for groupings of 3 bits, poorly for groupings of 4.
 
 [[http://play.golang.org/p/hqH-e8QuaG][/play.golang.org/p/hqH-e8QuaG]]
 
@@ -135,13 +149,17 @@ The Go simulator used as a basis for the Arduino version.
 
 * Types
 
-Consider defining types for various data paths.
+Consider defining types for various data paths to differentiate the role of a variable.
 
 .code pdp11/uint18.go
 
 * Types (cont.)
 
+Use named types to consolidate common logic.
+
 .code pdp11/regaddr.go
+
+Be careful with your inlining budget.
 
 * Traps
 
