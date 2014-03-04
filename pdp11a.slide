@@ -1,0 +1,266 @@
+pdp11
+Golang Melbourne
+05 Mar 2014
+
+Dave Cheney
+dave@cheney.net
+http://dave.cheney.net/
+@davecheney
+
+* pdp11
+
+* What is this talk about
+
+- A bit of history
+
+- A few tips
+
+- A few gotchas
+
+* Disclaimer
+
+This project has very little to do with the real world.
+
+* Why the PDP-11 ?
+
+.image pdp11/102680487-03-01.jpeg
+
+image courtesy of the Computer History Museum
+
+* Why the PDP-11 ?
+
+- Every computer you interact with today can trace itself back to the work of Ken and Dennis and the architectural style of the PDP-11.
+
+- Unix
+
+- ARM CPUs.
+
+* Yup, Windows as well
+
+- The PDP-11 was the predecessor to the VAX-11/780.
+
+- Dave Cutler, the author of VMS, the _other_ operating system for the 11/780 decamped to Microsoft after a struggle over the next generation of VAX hardware.
+
+- Cutler took VMS when he left Digital forming the conceptual basis of Windows NT.
+
+.image pdp11/showstopper.jpg
+
+* Why write the simulator in Go ?
+
+Go appears to be an excellent language for writing simulators
+
+- NES
+- TRS-80
+- ZX Spectrum
+- Quite a few 6502 implementations
+- (many) LISPs
+- [[http://dave.cheney.net/2013/01/09/go-the-language-for-emulators][dave.cheney.net/2013/01/09/go-the-language-for-emulators]]
+
+The Go simulator used as a base for the Arduino version.
+
+* The documentation is fantastic
+
+Let's look at the ADC instruction.
+
+.image pdp11/adc.png
+
+* The documentation (cont.)
+
+.image pdp11/timing1.png
+
+* The documentation (cont.)
+
+.image pdp11/timing2.png
+
+- Extended the simulator to compute the raw CPU time each instruction being executed
+
+- UNIX v6 took ~3.2 seconds of CPU time to boot. 
+
+- This does not include a _heck_ of a lot of overhead waiting for disk.
+
+[[http://dave.cheney.net/2014/02/16/avr11-performance-measurements][dave.cheney.net/2014/02/16/avr11-performance-measurements]]
+
+* Resources, resources, resources
+
+- Bitsavers.org has every user manual, every reference manual, and most of the schematics for all of the DEC PDP line of computers. 
+
+- They also have disk images, tape images, everything you will need
+
+- DEC Diagnostics
+
+* Time marches on
+
+This is the Cray-1a, an FPGA recreation of Seymour Cray's famous supercomputer. 
+
+.image pdp11/cray1a.jpg
+
+No copies of the Cray operating system exist today.
+
+* The simulator
+
+* Actually two simulators
+
+- Started as a Javascript simulator, [[http://pdp11.aiju.de/][pdp11.aiju.de/]]
+
+- Ported to Go, [[https://github.com/davecheney/pdp11][github.com/davecheney/pdp11]]
+- Ported to Arduino flavored C++, [[https://github.com/davecheney/avr11][github.com/davecheney/avr11]]
+
+* The process
+
+- Download the .js source 
+- One file at a time, transcribe function by function from .js to Go (surprisingly straight forward)
+
+- A few tricky bits
+- Console and Disk Drive used timers to simulate delays.
+- Traps (see later)
+- Once the simulator worked, iterate and refactor to make the code more idiomatic.
+
+- Bonus: fork the Go code and translate again into Arduino flavored C++
+
+* The main loop
+
+.code pdp11/loop.go
+
+* The main loop (cont.)
+
+.code pdp11/cpu.go
+
+* An aside about debugging flags
+
+Consider using build tags to enable debugging code.
+
+`release.go` 
+
+.code pdp11/release.go
+
+`debug.go`
+
+.code pdp11/debug.go
+
+    $ go build // release build
+    $ go build -tags debug // debug build
+
+* Types
+
+Consider defining types for various data paths to differentiate the role of a variable.
+
+.code pdp11/uint18.go
+
+* Types (cont.)
+
+Use named types to consolidate common logic.
+
+.code pdp11/regaddr.go
+
+Be careful with your inlining budget.
+
+* Traps
+
+The PDP-11 has interrupts and traps. Handling traps is a little tricky
+
+.code pdp11/trap.go /START1/,/END1/
+
+* Traps (cont.)
+
+.code pdp11/trap.go /START2/,/END2/
+
+* Testing
+
+// pdp11
+
+    # LS -L
+    TOTAL 241
+    DRWXRWXR-X  2 BIN      1104 MAY 14 00:47 BIN
+    DRWXRWXR-X  2 BIN      1824 OCT 10 12:31 DEV
+    DRWXRWXR-X  2 BIN       496 OCT 10 12:32 ETC
+    -RWXRWXRWX  1 ROOT    29074 OCT 10 12:28 HPUNIX
+    DRWXRWXR-X  2 BIN       464 MAY 13 23:35 LIB
+    DRWXRWXR-X  2 BIN        32 MAY 13 20:01 MNT
+    -RWXRWXRWX  1 ROOT    28836 OCT 10 12:22 RKUNIX
+    -RWXRWXRWX  1 ROOT    29020 OCT 10 12:25 RPUNIX
+    DRWXRWXRWX  2 BIN       272 OCT 10 12:31 TMP
+    -RWXRWXRWX  1 ROOT    27312 OCT 10 12:31 UNIX
+    DRWXRWXR-X 14 BIN       224 MAY 13 20:16 USR
+
+* Testing (cont.)
+
+// avr11
+
+    # LS -L
+    TOTAL 241
+    DRWXRWXR-X  2 BIN         0 MAY 14 00:47 BIN
+    DRWXRWXR-X  2 BIN         0 OCT 10 12:31 DEV
+    DRWXRWXR-X  2 BIN         0 OCT 10 12:32 ETC
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:28 HPUNIX
+    DRWXRWXR-X  2 BIN         0 MAY 13 23:35 LIB
+    DRWXRWXR-X  2 BIN         0 MAY 13 20:01 MNT
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:22 RKUNIX
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:25 RPUNIX
+    DRWXRWXRWX  2 BIN         0 OCT 10 12:31 TMP
+    -RWXRWXRWX  1 ROOT        0 OCT 10 12:31 UNIX
+    DRWXRWXR-X 14 BIN         0 MAY 13 20:16 USR
+
+Missing a carry bit somewhere (I think)
+
+* Testing (cont.)
+
+- The .js version, and my inital port were very monolithic.
+- cpu.step() was over 1,000 lines of switch statements, directly executed instructions.
+- Early tests execute synthetic commands to make sure the simulator doesn't barf.
+
+.play pdp11/runtest.go
+
+* Testing (cont.)
+
+.code pdp11/pdp.txt
+
+* Instruction testing
+
+.code pdp11/cpu_test.go /START1 OMIT/,/END1 OMIT/
+
+* Instruction testing (cont.)
+
+.code pdp11/cpu_test.go /START2 OMIT/,/END2 OMIT/
+
+* Instruction testing (cont.)
+
+Adding helpers sometimes makes testing coverage harder.
+
+.code pdp11/swab.go
+
+* An aside about managing your inlining budget
+
+.code pdp11/xor.go
+
+An old blog post about inlining [[http://dave.cheney.net/2012/02/11/how-the-go-language-improves-expressiveness-without-sacrificing-runtime-performance][dave.cheney.net/2012/02/11/how-the-go-language-improves-expressiveness-without-sacrificing-runtime-performance]]
+
+* Gotchas
+
+* Gotchas (part 1)
+
+`ADD()` contains a bug, what is it ?
+
+.code pdp11/add.go
+
+* Gotchas (part 2)
+
+What happens if `sector`, `surface`, and `cylinder` are declared as `uint16` ?
+
+.code pdp11/rk11.go
+
+* Gotchas (part 3)
+
+Will this code work on all platforms ?
+
+.code pdp11/mul.go
+
+* Demo time
+
+.play pdp11/demo.go
+
+* Thank you
+
+Try it for yourself
+
+   go get github.com/davecheney/unix6
+   $GOPATH/bin/unix6
