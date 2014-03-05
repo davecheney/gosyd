@@ -19,7 +19,7 @@ var instrTests = []suite{
 		regs:     regs{R1: 0177777, R7: 001000, PS: 000017},
 		core:     core{001000: 005001},
 		steps:    1,
-		wantregs: regs{R0: 0000000, R7: 001002, PS: 000004},
+		wantregs: regs{R1: 0000000, R7: 001002, PS: 000004},
 	},
 }
 
