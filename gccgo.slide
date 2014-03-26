@@ -1,0 +1,129 @@
+Experiments in gccgo
+Go Sydney Meetup
+26 Mar 2014
+
+Dave Cheney
+Canonical
+dave@cheney.net
+http://dave.cheney.net/
+@davecheney
+
+* gccgo
+
+- Excelent alternative compiler
+- Frontend developed by Ian Lance Taylor, MIT licenced
+- Gcc 4.7/4.8/4.9 backend
+- Supports a huge range of platforms
+
+* gccgo (cont.)
+
+- MIPS
+- PPC G4
+- ARM
+- Intel
+- Sparc ?
+
+* Canonical sponsored work to port gccgo to arm64 and ppc64
+
+- ARM v8 (also known as aarch64)
+- PowerPC 64bit
+
+Warning: forward facing statement
+
+- Shipping come hell or high water April 17th in Ubuntu 14.04
+
+* A few rough edges
+
+- Juju is HUGE (93k LOC, 200k with tests) + ~20 dependencies we've written
+- No native gc toolchain
+- no cmd/go
+
+* Build a Go program with gccgo
+
+    $ go build -compiler gccgo hello.go
+
+* cmd/go can't rebuild itself
+
+`cmd/go` can't rebuild itself
+
+	% go build -x cmd/go
+	WORK=/tmp/go-build525882661
+	cd /home/dfc/go/src/cmd/go
+	/home/dfc/go/pkg/tool/linux_amd64/6g -o $WORK/cmd/go.a -p cmd/go -complete -D _/home/dfc/go/src/cmd/go -I $WORK -pack ./build.go ./clean.go ./discovery.go ./doc.go ./env.go ./fix.go ./fmt.go ./get.go ./go11.go ./help.go ./http.go ./list.go ./main.go ./pkg.go ./run.go ./signal.go ./signal_unix.go ./test.go ./testflag.go ./tool.go ./vcs.go ./version.go ./vet.go ./zdefaultcc.go
+	/home/dfc/go/pkg/tool/linux_amd64/6l -o $WORK/cmd/go/_obj/exe/a.out -L $WORK -extld=clang $WORK/cmd/go.a
+	cp $WORK/cmd/go/_obj/exe/a.out go
+
+* cmd/go can't rebuild itself (cont.)
+
+	% go build -compiler gccgo -x cmd/go
+	WORK=/tmp/go-build153318598
+
+Nothing :(
+
+Turns out the `cmd` package prefix is _special_ 
+
+* cmd/go can't rebuild itself (cont.)
+
+Try renaming `cmd/go`
+
+	% cp -r $GOROOT/src/cmd/go $GOPATH/src
+	% go build -compiler gccgo go
+	can't load package: package go: no buildable Go source files in /home/dfc/go/src/pkg/go
+
+Hmmm, the import path `go` is still too special.
+
+* cmd/go can't rebuild itself (cont.)
+
+Build `go` via a loophole
+
+	% cd $GOPATH/src/go
+	% go build -compiler gccgo .
+	# _/home/dfc/src/go
+	./pkg.go:118:15: error: reference to undefined field or method ‘MFiles’
+        p.MFiles = pp.MFiles
+                      ^
+
+* cmd/go can't rebuild itself (cont.)
+
+Well, shit
+
+        ʕ╯◔ϖ◔ʔ╯︵ ┻━┻
+
+* cmd/go can't rebuild itself (cont.)
+
+- `p.MFiles` was added to `go/build` in Go 1.3, but gccgo still uses Go 1.2
+- Why does this matter ?
+- When you use `-compiler gccgo` program is built against gccgo's stdlib
+
+- Solution, for gccgo only platforms, build a fork of the Go 1.3 `cmd/go` tool that is compatible with gccgo's Go 1.2 version of `go/build`.
+
+* Different compilers, different supported architectures
+
+gc
+
+	% env GOARCH=arm64 go build gccgo
+	2014/03/26 14:58:35 unsupported GOARCH arm64
+
+gccgo
+
+	$ env GOARCH=arm64 go build gccgo
+	$ echo $?
+	0
+
+The list of supported GOOS and GOARCH are encoded in 
+
+	src/pkg/go/build/syslist.go
+
+* GOARCH and ARCHCHARs
+
+- gc toolchain gives every cpu architecture a letter (actually a number); 5, 6, 8
+- `cmd/go` refused to build an GOARCHs that didn't have letters
+- Michael Hudson applied for a new letter for arm64; 7
+- ppc64 is _secret_, how could I ask for a new letter ?
+
+- Solution: `cmd/go` doesn't actually use the letters for anything, so change `cmd/go` let that slide if `-compiler gccgo`
+
+* Wrapping up
+
+- gccgo 4.9 (prerelease) will be available in Ubuntu 14.04
+- Canonical are using it to ship Juju for platforms that don't have a _native_ gc compiler
