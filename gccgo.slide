@@ -1,4 +1,4 @@
-Experiments in gccgo
+Experiments with gccgo
 Go Sydney Meetup
 26 Mar 2014
 
@@ -8,11 +8,15 @@ dave@cheney.net
 http://dave.cheney.net/
 @davecheney
 
+* Before we begin
+
+_ixnay_on_the_wittertay!_
+
 * gccgo
 
-- Excelent alternative compiler
-- Frontend developed by Ian Lance Taylor, MIT licenced
-- Gcc 4.7/4.8/4.9 backend
+- Excellent alternative Go compiler
+- Front-end developed by Ian Taylor, MIT licensed
+- Gcc 4.7/4.8/4.9 back-end
 - Supports a huge range of platforms
 
 * gccgo (cont.)
@@ -53,12 +57,14 @@ Warning: forward facing statement
 	/home/dfc/go/pkg/tool/linux_amd64/6l -o $WORK/cmd/go/_obj/exe/a.out -L $WORK -extld=clang $WORK/cmd/go.a
 	cp $WORK/cmd/go/_obj/exe/a.out go
 
+Nothing.
+
 * cmd/go can't rebuild itself (cont.)
 
 	% go build -compiler gccgo -x cmd/go
 	WORK=/tmp/go-build153318598
 
-Nothing :(
+Stil nothing :(
 
 Turns out the `cmd` package prefix is _special_ 
 
@@ -93,9 +99,16 @@ Well, shit
 
 - `p.MFiles` was added to `go/build` in Go 1.3, but gccgo still uses Go 1.2
 - Why does this matter ?
-- When you use `-compiler gccgo` program is built against gccgo's stdlib
+- When you use `-compiler`gccgo` program is built against gccgo's stdlib
 
 - Solution, for gccgo only platforms, build a fork of the Go 1.3 `cmd/go` tool that is compatible with gccgo's Go 1.2 version of `go/build`.
+
+* Bootstrapping
+
+How do I even get a copy of `cmd/go` to be able to run `go build cmd/go` ?
+
+- Could cross compile
+- Ended up reviving the old Makefiles from release-r60 
 
 * Different compilers, different supported architectures
 
@@ -121,9 +134,10 @@ The list of supported GOOS and GOARCH are encoded in
 - Michael Hudson applied for a new letter for arm64; 7
 - ppc64 is _secret_, how could I ask for a new letter ?
 
-- Solution: `cmd/go` doesn't actually use the letters for anything, so change `cmd/go` let that slide if `-compiler gccgo`
+- Solution: `cmd/go` doesn't actually use the letters for anything in gccgo mode, so change `cmd/go` let that slide if `-compiler`gccgo`
 
 * Wrapping up
 
-- gccgo 4.9 (prerelease) will be available in Ubuntu 14.04
-- Canonical are using it to ship Juju for platforms that don't have a _native_ gc compiler
+- gccgo 4.9 (prerelease) will be available in Ubuntu 14.04.
+
+- It's pretty darn awesome, you should try it!
