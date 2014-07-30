@@ -1,0 +1,133 @@
+Tinyterm
+Go Sydney Meetup
+30 Jul 2014
+
+Dave Cheney
+dave@cheney.net
+http://dave.cheney.net/
+@davecheney
+
+* What the hell have you built?
+
+.image tinyterm/BNELF1GCUAExynU.png
+
+This is a story in several parts.
+
+There is some Go in this talk, trust me.
+
+* I²C
+
+.image tinyterm/i2c_Bus.png
+
+- Serial bus used on microcontrollers
+- Simple two wire protocol; clock and data
+
+* Not just for microcontrollers
+
+- I²C is used inside most PCs/Laptops 
+- Thermal sensors, reading serial numbers from DRAM chips
+- Detection of an external monitor
+
+* Yup
+
+.image tinyterm/ddc.png
+
+Source: [[http://www.paintyourdragon.com/?p=43][www.paintyourdragon.com/?p=43]]
+
+There is an I²C bus on your laptop!
+
+* Talking to I²C from Linux
+
+    % sudo modprobe i2c-dev
+
+* Talking to I²C from Linux
+
+    % sudo i2cdetect -y 2
+         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+    00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    50: 50 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+    70: -- -- -- -- -- -- -- -- 
+
+* Hooking things up
+
+.image tinyterm/i2c-adapter.png
+
+* Hooking things up
+
+.image tinyterm/i2c-adapter2.png
+
+* Go code
+
+.code tinyterm/i2c.go /START1 OMIT/,/END1 OMIT/
+
+.code tinyterm/i2c.go /START2 OMIT/,/END2 OMIT/
+
+* More Go code
+
+    % godoc github.com/davecheney/i2c Lcd
+    type Lcd struct {
+        // contains filtered or unexported fields
+    }
+
+    func NewLcd(i2c *I2C, en, rw, rs, d4, d5, d6, d7, backlight byte) (*Lcd, error)
+
+    func (lcd *Lcd) BacklightOff()
+
+    func (lcd *Lcd) BacklightOn()
+
+    func (lcd *Lcd) Clear()
+
+    func (lcd *Lcd) Command(cmd byte)
+
+    func (lcd *Lcd) Home()
+
+    func (lcd *Lcd) SetPosition(line, pos byte)
+
+    func (lcd *Lcd) Write(buf []byte) (int, error)
+
+* Talking to the LCD
+
+.code tinyterm/helloworld.go /START OMIT/,/END OMIT/
+
+* Helloworld
+
+.image tinyterm/i2c-adapter3.png
+
+* Boring, can we do better ?
+
+- Each I²C bus is a file
+- Each I²C device on the bus is a file
+- Processes talk to each over over file descriptors
+- That's basically all just an `io.Writer`, right ?
+
+* Tinyterm
+
+.code tinyterm/tinyterm.go /STARTMAIN OMIT/,/ENDMAIN OMIT/
+
+* Still just io.Writers
+
+.code tinyterm/tinyterm.go /STARTWRITER OMIT/,/ENDWRITER OMIT/
+
+* Putting it all together
+
+    % tinyterm bash -i
+
+- tinyterm initalises the LCD screen
+- The `lcdWriter` is used as `Stdout` and `Stderr`
+- Fork bash, which will send its output to the `lcdWriter`
+- Stdin is still connected to the original terminal
+
+* Demo time
+
+* Thank you
+
+Code: [[https://github.com/davecheney/i2c][github.com/davecheney/i2c]]
+
+Demos: `helloworld`, `tinyterm`
+
+Enjoy!
