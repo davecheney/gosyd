@@ -21,7 +21,7 @@ Release timeline:
 - Go 1.2 released 1st December, 2013
 - Go 1.3 released 18th June, 2014
 - Go 1.4 released 10th December, 2014
-- Go 1.5 released 19th August, 2015
+- [[Go 1.5][https://talks.golang.org/2015/state-of-go.slide#8]] released 19th August, 2015
 - Go 1.6 is expected to be released Feb, 2016
 
 * Supported platforms
@@ -94,7 +94,13 @@ The most likely problem caused by enabling vendoring by default happens in sourc
 
 For details about vendoring, see the documentation for the go command and the design document.
 
-* LLVM memory saitizer
+* LLVM memory sanitizer
+
+The `-race` detector detects unsafe memory access in Go code, but it cannot 
+
+    go build -msan $YOURCOMMAND
+
+This should probably be considered _experimental_.
 
 There is a new build flag, -msan, that compiles Go with support for the LLVM memory sanitizer. This is intended mainly for use when linking against C or C++ code that is being checked with the memory sanitizer.
 
@@ -105,6 +111,8 @@ Go 1.5 introduced the go doc command, which allows references to packages using 
 * Go vet command
 
 The go vet command now diagnoses passing function or method values as arguments to Printf, such as when passing f where f() was intended.
+
+
 
 * Performance
 
