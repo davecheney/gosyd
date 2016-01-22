@@ -6,13 +6,31 @@ YOUR NAME
 @YOURTWITTER
 http://talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide
 
-* Go 1.6 release party
+* Welcome
+
+Today (Feb 17th) is an attempt at a release party for Go 1.6 involving as many Go user groups as possible.
+
+There are NNN Go user groups taking part, you can find [[https://github.com/golang/go/wiki/Go-1.6-release-party#whos-involved][a list of them here]].
+
+This presentation is based _heavily_ on the [[http://tip.golang.org/doc/go1.6][official Go 1.6 release notes]].
+
+This presentation contains lots of links to further reading. You can find it online, [[talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide][http://talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide]]
+
+* Go 1.6
+
+The latest Go release, version 1.6, arrives six months after 1.5.
+
+Most of its changes are in the implementation of the language, runtime, and libraries. There are no changes to the language specification.
+
+As always, the release maintains the [[http://tip.golang.org/doc/go1compat.html][Go 1 compatability guarentee]].
+
+Almost all Go programs are expected to continue to compile and run as before.
 
 * The Go project by the numbers
 
 Go was announced as an open source project November 10th, 2009.
 
-Releases occur on a 6 month cadance with several bug fix point releases between each major release.
+Releases occur on a ~6 month cadance with several bug fix point releases between each major release.
 
 Release timeline:
 
@@ -21,20 +39,20 @@ Release timeline:
 - Go 1.2 released 1st December, 2013
 - Go 1.3 released 18th June, 2014
 - Go 1.4 released 10th December, 2014
-- [[Go 1.5][https://talks.golang.org/2015/state-of-go.slide#8]] released 19th August, 2015
+- [[https://talks.golang.org/2015/state-of-go.slide#8][Go 1.5]] released 19th August, 2015
 - Go 1.6 is expected to be released Feb, 2016
 
 * Supported platforms
 
-Go 1.6 supports the following operating systems
+Go 1.6 supports the following operating systems:
 
 - Windows, OSX (darwin), Android, iOS, NaCl, DragonflyBSD, FreeBSD, Linux, NetBSD, OpenBSD, Plan 9, Solaris/Illumos
 
-Go 1.6 supports the following CPU architectures
+Go 1.6 supports the following CPU architectures:
 
 - Intel (386 and amd64), arm (ARMv5, v6, v7), arm64, 64 bit PowerPC (big and little endian), 64 bit MIPS (big and little endian)
-
 - s390x (IBM Z series) planned for Go 1.7
+- RISC-V may be on the horizon.
 
 * Cross compilation
 
@@ -43,40 +61,62 @@ You can cross compile from any platform to any other platform like this
     # cross compile from your machine to Windows
     env GOOS=windows go build $YOURPACKAGE 
 
-* Go 1.6 Release Notes
+This works with the binary release from the [[https://golang.org/dl/][golang.org]]. As of Go 1.5, you no longer need to 'bless' your Go install before cross compiling.
 
-* Introduction
+Read more:
 
-The latest Go release, version 1.6, arrives six months after 1.5. Most of its changes are in the implementation of the language, runtime, and libraries. There are no changes to the language specification. As always, the release maintains the Go 1 promise of compatibility. We expect almost all Go programs to continue to compile and run as before.
+- [[http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5][Cross compilation with Go 1.5]]
+- [[https://medium.com/@rakyll/go-1-5-cross-compilation-488092ba44ec#.7wrgy0a5s][Go 1.5: Cross compilation]]
 
 * Cgo
 
 There is one major change to cgo, along with one minor change.
 
-The major change is the definition of rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector. Briefly, Go and C may share memory allocated by Go when a pointer to that memory is passed to C as part of a cgo call, provided that the memory itself contains no pointers to Go-allocated memory, and provided that C does not retain the pointer after the call returns. These rules are checked by the runtime during program execution: if the runtime detects a violation, it prints a diagnosis and crashes the program. The checks can be disabled by setting the environment variable GODEBUG=cgocheck=0, but note that the vast majority of code identified by the checks is subtly incompatible with garbage collection in one way or another. Disabling the checks will typically only lead to more mysterious failure modes. Fixing the code in question should be strongly preferred over turning off the checks. See the cgo documentation for more details.
+* Passing pointers to Go allocated memory to C
 
-The minor change is the addition of explicit C.complexfloat and C.complexdouble types, separate from Go's complex64 and complex128. Matching the other numeric types, C's complex types and Go's complex type are no longer interchangeable.
+The major change is the definition of rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector.
+
+Go and C may share memory allocated by Go when a pointer to that memory is passed to C as part of a cgo call, provided that the memory itself contains no pointers to Go-allocated memory, and provided that C does not retain the pointer after the call returns.
+
+These rules are checked by the runtime during program execution: if the runtime detects a violation, it prints a diagnosis and crashes the program.
+
+The checks can be disabled by setting the environment variable GODEBUG=cgocheck=0, but note that disabling the checks will typically only lead to more mysterious failure modes.
+
+Fixing the code in question should be strongly preferred over turning off the checks. See the cgo documentation for more details.
+
+* C.complexfloat and C.complexdouble types
+
+The minor change is the addition of explicit C.complexfloat and C.complexdouble types, separate from Go's complex64 and complex128.
+
+Matching the other numeric types, C's complex types and Go's complex type are no longer interchangeable.
 
 * Compiler Toolchain
 
-The compiler toolchain is mostly unchanged. Internally, the most significant change is that the parser is now hand-written instead of generated from yacc.
+Externally the compiler toolchain is mostly unchanged compared to Go 1.5.
 
-The compiler, linker, and go command have new flag -msan, analogous to -race and only available on linux/amd64, that enables interoperation with the Clang MemorySanitizer. Such interoperation useful mainly for testing a program containing suspect C or C++ code.
+Internally, the most significant change is that the parser is now hand-written instead of generated from yacc.
+
+The new SSA compiler backend is slated to land, for amd64 only at this stage, in Go 1.7.
 
 The linker has a new option -libgcc to set the expected location of the C compiler support library when linking cgo code. The option is only consulted when using -linkmode=internal, and it may be set to none to disable the use of a support library.
+
+* Shared library support
 
 The implementation of build modes started in Go 1.5 has been expanded to more systems. This release adds support for the c-shared mode on android/386, android/amd64, android/arm64, linux/386, and linux/arm64; for the shared mode on linux/386, linux/arm, linux/amd64, and linux/ppc64le; and for the new pie mode (generating position-independent executables) on android/386, android/amd64, android/arm, android/arm64, linux/386, linux/amd64, linux/arm, linux/arm64, and linux/ppc64le. See the design document for details.
 
 * Changes to the -X flag
 
-As a reminder, the linker's -X flag changed in Go 1.5. In Go 1.4 and earlier, it took two arguments, as in
+In Go 1.5 the linker's -X flag changed.
 
--X importpath.name value
+In Go 1.4 and earlier, it took two arguments, as in
+
+    -X importpath.name value
+
 Go 1.5 added an alternative syntax using a single argument that is itself a name=value pair:
 
--X importpath.name=value
-In Go 1.5 the old syntax was still accepted, after printing a warning suggesting use of the new syntax instead. Go 1.6 continues to accept the old syntax and print the warning. Go 1.7 will remove support for the old syntax.
+    -X importpath.name=value
 
+In Go 1.5 the old syntax was still accepted, after printing a warning suggesting use of the new syntax instead. Go 1.6 continues to accept the old syntax and print the warning. Go 1.7 will remove support for the old syntax.
 
 * Gccgo
 
@@ -88,21 +128,48 @@ The go command's basic operation is unchanged, but there are a number of changes
 
 * Vendor support
 
-Go 1.5 introduced experimental support for vendoring, enabled by setting the GO15VENDOREXPERIMENT environment variable to 1. Go 1.6 keeps the vendoring support, no longer considered experimental, and enables it by default. It can be disabled explicitly by setting the GO15VENDOREXPERIMENT environment variable to 0. Go 1.7 will remove support for the environment variable.
+Go 1.5 introduced experimental support for vendoring, enabled by setting the `GO15VENDOREXPERIMENT` environment variable to 1
+
+Go 1.6 keeps the vendoring support, no longer considered experimental, and enables it by default.
+
+It can be disabled explicitly by setting the GO15VENDOREXPERIMENT environment variable to 0. Go 1.7 will remove support for the environment variable.
 
 The most likely problem caused by enabling vendoring by default happens in source trees containing an existing directory named vendor that does not expect to be interpreted according to new vendoring semantics. In this case, the simplest fix is to rename the directory to anything other than vendor and update any affected import paths.
 
 For details about vendoring, see the documentation for the go command and the design document.
 
-* LLVM memory sanitizer
+* Things to watch out for
 
-The `-race` detector detects unsafe memory access in Go code, but it cannot 
+* Vendored code match ./...
+
+If you're used to doing
+
+   % cd $GOPATH/github.com/you/repo
+   % go test ./...
+
+Be aware that vendored packages, like
+
+   $GOPATH/github.com/you/repo/vendor/github.com/dependecy/repo
+
+Will match the go tool glob operator `...`, and probably cause the test to fail.
+
+The workaround is to filter out vendored packages by name
+
+   go test $(go list ./... | grep -v /vendor/)
+
+Read More
+
+- [[https://github.com/golang/go/issues/11659#issuecomment-171678025][Issue 11659]]
+
+* LLVM memory sanitizer, -msan
+
+The compiler, linker, and go command have new flag `-msan`, analogous to `-race` that enables interoperation with the Clang MemorySanitizer.
+
+Such interoperation useful mainly for testing a program containing suspect C or C++ code.
 
     go build -msan $YOURCOMMAND
 
-This should probably be considered _experimental_.
-
-There is a new build flag, -msan, that compiles Go with support for the LLVM memory sanitizer. This is intended mainly for use when linking against C or C++ code that is being checked with the memory sanitizer.
+This should probably be considered _experimental_ and only available on linux/amd64.
 
 * Go doc command
 
@@ -111,8 +178,6 @@ Go 1.5 introduced the go doc command, which allows references to packages using 
 * Go vet command
 
 The go vet command now diagnoses passing function or method values as arguments to Printf, such as when passing f where f() was intended.
-
-
 
 * Performance
 
@@ -138,17 +203,37 @@ Programs that must adjust HTTP/2 protocol-specific details can import and use go
 
 * maps panic if you misuse them
 
-The runtime has added lightweight, best-effort detection of concurrent misuse of maps. As always, if one goroutine is writing to a map, no other goroutine should be reading or writing the map concurrently. If the runtime detects this condition, it prints a diagnosis and crashes the program. The best way to find out more about the problem is to run the program under the race detector, which will more reliably identify the race and give more detail.
+The runtime has added lightweight, best-effort detection of concurrent misuse of maps.
 
-* Panic messages are now shorter
+If the runtime detects this condition, it prints a diagnosis and crashes the program.
 
-For program-ending panics, the runtime now by default prints only the stack of the running goroutine, not all existing goroutines. Usually only the current goroutine is relevant to a panic, so omitting the others significantly reduces irrelevant output in a crash message. To see the stacks from all goroutines in crash messages, set the environment variable GOTRACEBACK to all or call debug.SetTraceback before the crash, and rerun the program. See the runtime documentation for details.
+    fatal error: concurrent map writes
 
-Updating: Uncaught panics intended to dump the state of the entire program, such as when a timeout is detected or when explicitly handling a received signal, should now call debug.SetTraceback("all") before panicking. Searching for uses of signal.Notify may help identify such code.
+    goroutine 2726 [running]:
+    runtime.throw(0x192d630, 0x15)
+        /usr/lib/go/src/runtime/panic.go:530 +0x90 fp=0xc8202eb838 sp=0xc8202eb820
+
+The best way to find out more about the problem is to run the program under the race detector.
+
+* Panic messages are shorter by default
+
+For program-ending panics, the runtime now by default prints _only_the_stack_of_the_running_goroutine_, not all existing goroutines.
+
+Usually only the current goroutine is relevant to a panic, so omitting the others significantly reduces irrelevant output in a crash message.
+
+To see the stacks from all goroutines in crash messages, set the environment variable `GOTRACEBACK` to all or call `debug.SetTraceback` before the crash, and rerun the program.
+
+    env GOTRACEBACK=all ./crashy
+
+Read more:
+
+- [[A whirlwind tour of Go’s runtime environment variables][http://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables#GOTRACEBACK]]
 
 * Windows timer resolution 
 
-On Windows, Go programs in Go 1.5 and earlier forced the global Windows timer resolution to 1ms at startup by calling timeBeginPeriod(1). Go no longer needs this for good scheduler performance, and changing the global timer resolution caused problems on some systems, so the call has been removed.
+On Windows, Go programs in Go 1.5 and earlier forced the global Windows timer resolution to 1ms at startup by calling `timeBeginPeriod(1)`.
+
+Go 1.6 no longer needs this for good scheduler performance, and changing the global timer resolution caused problems on some systems, so the call has been removed.
 
 * Reflect
 
@@ -174,20 +259,30 @@ Updating: The definition of Sort makes no guarantee about the final order of equ
 
 In the text/template package, there are two significant new features to make writing templates easier.
 
-First, it is now possible to trim spaces around template actions, which can make template definitions more readable. A minus sign at the beginning of an action says to trim space before the action, and a minus sign at the end of an action says to trim space after the action. For example, the template
+* Stripping whitespace
 
-{{23 -}}
-   <
-{{- 45}}
-formats as 23<45.
+It is now possible to trim spaces around template actions, which can make template definitions more readable.
 
-Second, the new {{block}} action, combined with allowing redefinition of named templates, provides a simple way to define pieces of a template that can be replaced in different instantiations. For example, the template
+A minus sign at the beginning of an action says to trim space before the action, and a minus sign at the end of an action says to trim space after the action. For example, the template
 
-<title>{{block "title"}}Page Title{{end}}</title>
-<body>
-<h1>{{template "title"}}</h1>
-{{block "page"}}Main text{{end}}
-defines the basic formatting of a web page. A program can then overlay that template with new definitions for the "title" and "page" blocks to reuse the formatting for another page.
+    {{23 -}}
+       <
+    {{- 45}}
+
+formats as `23<45`.
+
+* {{block}} action
+
+The new {{block}} action, combined with allowing redefinition of named templates, provides a simple way to define pieces of a template that can be replaced in different instantiations.
+
+For example, the template below defines the basic formatting of a web page:
+
+    <title>{{block "title"}}Page Title{{end}}</title>
+    <body>
+    <h1>{{template "title"}}</h1>
+    {{block "page"}}Main text{{end}}
+
+A program can then overlay that template with new definitions for the "title" and "page" blocks to reuse the formatting for another page.
 
 * Minor standard library changes
 
@@ -201,9 +296,12 @@ defines the basic formatting of a web page. A program can then overlay that temp
 
 - The compress/flate, compress/gzip, and compress/zlib packages now report io.ErrUnexpectedEOF for truncated input streams, instead of io.EOF.
 The crypto/cipher package now overwrites the destination buffer in the event of a GCM decryption failure. This is to allow the AESNI code to avoid using a temporary buffer.
-The crypto/tls package has a variety of minor changes. It now allows Listen to succeed when the Config has a nil Certificates, as long as the GetCertificate callback is set, it adds support for RSA with AES-GCM cipher suites, and it adds a RecordHeaderError to allow clients (in particular, the net/http package) to report a better error when attempting a TLS connection to a non-TLS server.
-The crypto/x509 package now permits certificates to contain negative serial numbers (technically an error, but unfortunately common in practice), and it defines a new InsecureAlgorithmError to give a better error message when rejecting a certificate signed with an insecure algorithm like MD5.
-The debug/dwarf and debug/elf packages together add support for compressed DWARF sections. User code needs no updating: the sections are decompressed automatically when read.
+
+- The crypto/tls package has a variety of minor changes. It now allows Listen to succeed when the Config has a nil Certificates, as long as the GetCertificate callback is set, it adds support for RSA with AES-GCM cipher suites, and it adds a RecordHeaderError to allow clients (in particular, the net/http package) to report a better error when attempting a TLS connection to a non-TLS server.
+
+- The crypto/x509 package now permits certificates to contain negative serial numbers (technically an error, but unfortunately common in practice), and it defines a new InsecureAlgorithmError to give a better error message when rejecting a certificate signed with an insecure algorithm like MD5.
+
+- The debug/dwarf and debug/elf packages together add support for compressed DWARF sections. User code needs no updating: the sections are decompressed automatically when read.
 The debug/elf package adds support for general compressed ELF sections. User code needs no updating: the sections are decompressed automatically when read. However, compressed Section's do not support random access: they have a nil ReaderAt field.
 The encoding/asn1 package now exports tag and class constants useful for advanced parsing of ASN.1 structures.
 Also in the encoding/asn1 package, Unmarshal now rejects various non-standard integer and length encodings.
@@ -234,5 +332,5 @@ In the regexp package, the Regexp type has always been safe for use by concurren
 The strconv package adds IsGraphic, QuoteToGraphic, QuoteRuneToGraphic, AppendQuoteToGraphic, and AppendQuoteRuneToGraphic, analogous to IsPrint, QuoteToPrint, and so on. The Print family escapes all space characters except ASCII space (U+0020). In contrast, the Graphic family does not escape any Unicode space characters (category Zs).
 In the testing package, when a test calls t.Parallel, that test is paused until all non-parallel tests complete, and then that test continues execution with all other parallel tests. Go 1.6 changes the time reported for such a test: previously the time counted only the parallel execution, but now it also counts the time from the start of testing until the call to t.Parallel.
 The text/template package contains two minor changes, in addition to the major changes described above. First, it adds a new ExecError type returned for any error during Execute that does not originate in a Write to the underlying writer. Callers can distinguish template usage errors from I/O errors by checking for ExecError. Second, the Funcs method now checks that the names used as keys in the FuncMap are identifiers that can appear in a template function invocation. If not, Funcs panics.
-The time package's Parse function has always rejected any day of month larger than 31, such as January 32. In Go 1.6, Parse now also rejects February 29 in non-leap years, February 30, February 31, April 31, June 31, September 31, and November 31.
+- The time package's Parse function has always rejected any day of month larger than 31, such as January 32. In Go 1.6, Parse now also rejects February 29 in non-leap years, February 30, February 31, April 31, June 31, September 31, and November 31.
 
