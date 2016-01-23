@@ -244,7 +244,7 @@ There have been significant optimizations bringing more than 10% improvements to
 
 * Sorting
 
-In the sort package, the implementation of `Sort` has been rewritten to make about 10% fewer calls to the `Interface`'s `Less` and `Swap` methods.
+In the sort package, the implementation of `Sort` has been rewritten to make about 10% fewer calls to the Interface's `Less` and `Swap` methods.
 
 The new algorithm does choose a different ordering than before for values that compare equal (those pairs for which `Less(i,`j)` and `Less(j,`i)` are false).
 
@@ -252,21 +252,13 @@ The definition of `Sort` makes no guarantee about the final order of _equal_valu
 
 Such programs should either refine their Less implementations to report the desired order or should switch to `sort.Stable`, which preserves the original input order of equal values.
 
-* Templates
-
-In the text/template package, there are two significant new features to make writing templates easier.
-
-* Stripping whitespace
+* Stripping whitespace with text/template
 
 It is now possible to trim spaces around template actions, which can make template definitions more readable.
 
-A minus sign at the beginning of an action says to trim space before the action, and a minus sign at the end of an action says to trim space after the action. For example, the template
+A minus sign at the beginning of an action says to trim space before the action, and a minus sign at the end of an action says to trim space after the action.
 
-    {{23 -}}
-       <
-    {{- 45}}
-
-formats as `23<45`.
+.play go1.6/template.go
 
 * {{block}} action
 
@@ -366,9 +358,11 @@ The os package's IsExist, IsNotExist, and IsPermission now return correct result
 
 This is useful if you have an unknown error value and want 
 
-On Unix-like systems, when a write to os.Stdout or os.Stderr (more precisely, an os.File opened for file descriptor 1 or 2) fails due to a broken pipe error, the program will raise a SIGPIPE signal. By default this will cause the program to exit; this may be changed by calling the os/signal Notify function for syscall.SIGPIPE. A write to a broken pipe on a file descriptor other 1 or 2 will simply return syscall.EPIPE (possibly wrapped in os.PathError and/or os.SyscallError) to the caller. The old behavior of raising an uncatchable SIGPIPE signal after 10 consecutive writes to a broken pipe no longer occurs.
+On Unix-like systems, when a write to os.Stdout or os.Stderr (more precisely, an os.File opened for file descriptor 1 or 2) fails due to a broken pipe error, the program will raise a SIGPIPE signal. By default this will cause the program to exit; this may be changed by calling the os/signal Notify function for syscall.SIGPIPE. A write to a broken pipe on a file descriptor other 1 or 2 will simply return syscall.EPIPE (possibly wrapped in os.PathError and/or os.SyscallError) to the caller.
 
-On Windows, the path/filepath package's Join function now correctly handles the case when the base is a relative drive path. For example, Join(`c:`, `a`) now returns `c:a` instead of `c:\a` as in past releases. This may affect code that expects the incorrect result.
+The old behavior of raising an uncatchable SIGPIPE signal after 10 consecutive writes to a broken pipe no longer occurs.
+
+TODO: WRITE EXAMPLE
 
 * regexp
 
@@ -378,10 +372,16 @@ Some high-concurrency servers using the same Regexp from many goroutines have se
 
 To help such servers, Regexp now has a Copy method, which makes a copy of a Regexp that shares most of the structure of the original but has its own scratch space cache.
 
+    re1 := regexp.MustCompile(`^(?P<root>github\.com/([A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+))(/[A-Za-z0-9_.\-]+)*$`)
+    re2 := re1.Copy()
+
 A copy does have additional space overhead, so Copy should only be used when contention has been observed.
 
+* time
 
-In the testing package, when a test calls t.Parallel, that test is paused until all non-parallel tests complete, and then that test continues execution with all other parallel tests. Go 1.6 changes the time reported for such a test: previously the time counted only the parallel execution, but now it also counts the time from the start of testing until the call to t.Parallel.
+The time package's Parse function has always rejected any day of month larger than 31, such as January 32.
 
-- The time package's Parse function has always rejected any day of month larger than 31, such as January 32. In Go 1.6, Parse now also rejects February 29 in non-leap years, February 30, February 31, April 31, June 31, September 31, and November 31.
+In Go 1.6, Parse now also rejects February 29 in non-leap years, February 30, February 31, April 31, June 31, September 31, and November 31.
+
+.play go1.6/parse.go
 
