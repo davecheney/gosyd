@@ -34,8 +34,8 @@ Releases occur on a ~6 month cadance with several bug fix point releases between
 
 Release timeline:
 
-- Go 1.0 released 28th March, 2012 # TODO link to path to Go 1 presentations
-- Go 1.1 released 13th May, 2013 # TODO link to adg's Go 1.1 presentation from GoSF
+- [[http://blog.golang.org/the-path-to-go-1][Go 1.0]] released 28th March, 2012
+- [[http://talks.golang.org/2013/go1.1.slide#1][Go 1.1]] released 13th May, 2013
 - Go 1.2 released 1st December, 2013
 - Go 1.3 released 18th June, 2014
 - Go 1.4 released 10th December, 2014
@@ -68,11 +68,33 @@ Read more:
 - [[http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5][Cross compilation with Go 1.5]]
 - [[https://medium.com/@rakyll/go-1-5-cross-compilation-488092ba44ec#.7wrgy0a5s][Go 1.5: Cross compilation]]
 
+* Garbage collector improvements
+
+Go 1.5 introduced the low latency garbage collector.
+
+The new collector trades throughput for reduced latency, allocations pay (in terms of time) a little up front to reduce the time taken to clean up the allocation.
+
+A lot of work went into optimising and tuning the gc in the Go 1.6 cycle, enabling far larger heaps to be managed under the 10ms latency window.
+
+* Go 1.5
+
+At [[https://www.youtube.com/watch?v=aiv1JOfMjm0][GopherCon 2015 Rick Hudson gave a presentation]] about the Go 1.5 low latency collector
+
+.image go1.6/go15.png 400 _
+
+* Go 1.6
+
+At [[http://www.infoq.com/presentations/go-gc-performance][QCon SF in November Rick Hudson]] gave an updated presentation which showed this comparison of Go 1.5 to the upcoming Go 1.6
+
+.image go1.6/go16.png 400 _
+
+_Yes,_that_is_Gigabytes_on_the_X_axis_
+
 * Cgo
 
 There is one major change to cgo, along with one minor change.
 
-* Passing pointers to Go allocated memory to C
+* Sharing pointers between Go and C
 
 The major change is the definition of rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector.
 
@@ -80,9 +102,9 @@ Go and C may share memory allocated by Go when a pointer to that memory is passe
 
 These rules are checked by the runtime during program execution: if the runtime detects a violation, it prints a diagnosis and crashes the program.
 
-The checks can be disabled by setting the environment variable GODEBUG=cgocheck=0, but note that disabling the checks will typically only lead to more mysterious failure modes.
+The checks can be disabled by setting the environment variable `GODEBUG=cgocheck=0`, but note that disabling the checks will typically only lead to more mysterious failure modes.
 
-Fixing the code in question should be strongly preferred over turning off the checks. See the cgo documentation for more details.
+Fixing the code in question should be strongly preferred over turning off the checks.
 
 * C.complexfloat and C.complexdouble types
 
@@ -97,8 +119,6 @@ Externally the compiler toolchain is mostly unchanged compared to Go 1.5.
 Internally, the most significant change is that the parser is now hand-written instead of generated from yacc.
 
 The new SSA compiler backend is slated to land, for amd64 only at this stage, in Go 1.7.
-
-The linker has a new option -libgcc to set the expected location of the C compiler support library when linking cgo code. The option is only consulted when using -linkmode=internal, and it may be set to none to disable the use of a support library.
 
 * Shared library support
 
