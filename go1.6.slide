@@ -71,7 +71,7 @@ You can cross compile from any platform to any other platform like this
 
 This works with the binary release from the [[https://golang.org/dl/][golang.org]].
 
-As of Go 1.5, you no longer need to 'bless' your Go install before cross compiling -- it just works.
+As of Go 1.5, you no longer need to 'bless' your Go install before cross compiling—it just works.
 
 Read more:
 
@@ -86,7 +86,7 @@ The new collector trades throughput for reduced latency.
 
 Allocations pay (in terms of time) a little up front to reduce the time taken to clean up later, this reduces the overall time the gc has to stop the world.
 
-A lot of work went into optimising and tuning the gc in the Go 1.6 cycle, enabling far larger heaps to be managed under the 10ms latency window.
+For Go 1.6 a lot of work went into optimising and tuning the gc, enabling far larger heaps to be managed within the 10ms latency goal.
 
 * Go 1.5
 
@@ -100,7 +100,7 @@ At [[http://www.infoq.com/presentations/go-gc-performance][QCon SF in November R
 
 .image go1.6/go16.png 400 _
 
-_Yes,_that_is_Gigabytes_on_the_X_axis_
+_Yes,_that_is_gigabytes_on_the_X_axis_
 
 * HTTP/2
 
@@ -135,12 +135,6 @@ Internally, the most significant change is that the parser is now hand-written i
 
 The new SSA compiler backend is slated to land, for amd64 only at this stage, in Go 1.7.
 
-* Shared library support
-
-TODO: SHOW EXAMPLE OF COMPILING USING SHARED LIBRARIES
-
-The implementation of build modes started in Go 1.5 has been expanded to more systems. This release adds support for the c-shared mode on android/386, android/amd64, android/arm64, linux/386, and linux/arm64; for the shared mode on linux/386, linux/arm, linux/amd64, and linux/ppc64le; and for the new pie mode (generating position-independent executables) on android/386, android/amd64, android/arm, android/arm64, linux/386, linux/amd64, linux/arm, linux/arm64, and linux/ppc64le. See the design document for details.
-
 * Changes to the -X flag
 
 In Go 1.5 the linker's -X flag changed.
@@ -155,15 +149,39 @@ Go 1.5 added an alternative syntax using a single argument that is itself a name
 
 In Go 1.5 the old syntax was still accepted, after printing a warning suggesting use of the new syntax instead. Go 1.6 continues to accept the old syntax and print the warning. Go 1.7 will remove support for the old syntax.
 
-* Gccgo
+* maps panic if you misuse them
 
-The release schedules for the GCC and Go projects do not coincide.
+The runtime has added lightweight, best-effort detection of concurrent misuse of maps.
 
-GCC release 5 contains the Go 1.4 version of gccgo.
+If the runtime detects this condition, it prints a diagnosis and crashes the program.
 
-The next release, GCC 6, will have the Go 1.5 version of gccgo.
+    fatal error: concurrent map writes
 
-Due to release scheduling, it is likely that Go 1.6 will not be in a GCC release until GCC 7.
+    goroutine 2726 [running]:
+    runtime.throw(0x192d630, 0x15)
+        /usr/lib/go/src/runtime/panic.go:530 +0x90 fp=0xc8202eb838 sp=0xc8202eb820
+
+The best way to find out more about the problem is to run the program under the race detector.
+
+* Panic messages are shorter by default
+
+For program-ending panics, the runtime now by default prints _only_the_stack_of_the_running_goroutine_, not all existing goroutines.
+
+Usually only the current goroutine is relevant to a panic, so omitting the others significantly reduces irrelevant output in a crash message.
+
+To see the stacks from all goroutines in crash messages, set the environment variable `GOTRACEBACK` to all or call `debug.SetTraceback` before the crash, and rerun the program.
+
+    env GOTRACEBACK=all ./crashy
+
+Read more:
+
+- [[http://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables#GOTRACEBACK][A whirlwind tour of Go’s runtime environment variables]]
+
+* Windows timer resolution 
+
+On Windows, Go programs in Go 1.5 and earlier forced the global Windows timer resolution to 1ms at startup by calling `timeBeginPeriod(1)`.
+
+Go 1.6 no longer needs this for good scheduler performance, and changing the global timer resolution caused problems on some systems, so the call has been removed.
 
 * Vendor support
 
@@ -210,15 +228,11 @@ Such interoperation useful mainly for testing a program containing suspect C or 
 
 This should probably be considered _experimental_ and only available on linux/amd64.
 
-* Go doc command
+* Shared library support
 
-Go 1.5 introduced the go doc command, which allows references to packages using only the package name, as in go doc http. In the event of ambiguity, the Go 1.5 behavior was to use the package with the lexicographically earliest import path. In Go 1.6, ambiguity is resolved by preferring import paths with fewer elements, breaking ties using lexicographic comparison. An important effect of this change is that original copies of packages are now preferred over vendored copies. Successful searches also tend to run faster.
+TODO: SHOW EXAMPLE OF COMPILING USING SHARED LIBRARIES
 
-* Go vet command
-
-The go vet command now diagnoses passing function or method values as arguments to Printf, such as when passing f where f() was intended.
-
-TODO: ADD EXAMPLE
+_note:_ dynamic loading of code at run time (plugins) is still not supported.
 
 * Performance
 
@@ -228,63 +242,15 @@ The garbage collector's pauses are even lower than in Go 1.5, although the effec
 
 There have been significant optimizations bringing more than 10% improvements to implementations of the compress/bzip2, compress/gzip, crypto/aes, crypto/elliptic, crypto/ecdsa, and sort packages.
 
-* Core library
-
-* Runtime
-
-* maps panic if you misuse them
-
-The runtime has added lightweight, best-effort detection of concurrent misuse of maps.
-
-If the runtime detects this condition, it prints a diagnosis and crashes the program.
-
-    fatal error: concurrent map writes
-
-    goroutine 2726 [running]:
-    runtime.throw(0x192d630, 0x15)
-        /usr/lib/go/src/runtime/panic.go:530 +0x90 fp=0xc8202eb838 sp=0xc8202eb820
-
-The best way to find out more about the problem is to run the program under the race detector.
-
-* Panic messages are shorter by default
-
-For program-ending panics, the runtime now by default prints _only_the_stack_of_the_running_goroutine_, not all existing goroutines.
-
-Usually only the current goroutine is relevant to a panic, so omitting the others significantly reduces irrelevant output in a crash message.
-
-To see the stacks from all goroutines in crash messages, set the environment variable `GOTRACEBACK` to all or call `debug.SetTraceback` before the crash, and rerun the program.
-
-    env GOTRACEBACK=all ./crashy
-
-Read more:
-
-- [[A whirlwind tour of Go’s runtime environment variables][http://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables#GOTRACEBACK]]
-
-* Windows timer resolution 
-
-On Windows, Go programs in Go 1.5 and earlier forced the global Windows timer resolution to 1ms at startup by calling `timeBeginPeriod(1)`.
-
-Go 1.6 no longer needs this for good scheduler performance, and changing the global timer resolution caused problems on some systems, so the call has been removed.
-
-* Reflect
-
-The reflect package has resolved a long-standing incompatibility between the gc and gccgo toolchains regarding embedded unexported struct types containing exported fields. Code that walks data structures using reflection, especially to implement serialization in the spirit of the encoding/json and encoding/xml packages, may need to be updated.
-
-The problem arises when using reflection to walk through an embedded unexported struct-typed field into an exported field of that struct. In this case, reflect had incorrectly reported the embedded field as exported, by returning an empty Field.PkgPath. Now it correctly reports the field as unexported but ignores that fact when evaluating access to exported fields contained within the struct.
-
-Updating: Typically, code that previously walked over structs and used
-
-f.PkgPath != ""
-to exclude inaccessible fields should now use
-
-f.PkgPath != "" && !f.Anonymous
-For example, see the changes to the implementations of encoding/json and encoding/xml.
-
 * Sorting
 
-In the sort package, the implementation of Sort has been rewritten to make about 10% fewer calls to the Interface's Less and Swap methods, with a corresponding overall time savings. The new algorithm does choose a different ordering than before for values that compare equal (those pairs for which Less(i, j) and Less(j, i) are false).
+In the sort package, the implementation of `Sort` has been rewritten to make about 10% fewer calls to the `Interface`'s `Less` and `Swap` methods.
 
-Updating: The definition of Sort makes no guarantee about the final order of equal values, but the new behavior may still break programs that expect a specific order. Such programs should either refine their Less implementations to report the desired order or should switch to Stable, which preserves the original input order of equal values.
+The new algorithm does choose a different ordering than before for values that compare equal (those pairs for which `Less(i,`j)` and `Less(j,`i)` are false).
+
+The definition of `Sort` makes no guarantee about the final order of _equal_values_, the new behavior may break programs that expect a specific order.
+
+Such programs should either refine their Less implementations to report the desired order or should switch to `sort.Stable`, which preserves the original input order of equal values.
 
 * Templates
 
@@ -315,18 +281,46 @@ For example, the template below defines the basic formatting of a web page:
 
 A program can then overlay that template with new definitions for the "title" and "page" blocks to reuse the formatting for another page.
 
+* Go vet command
+
+The go vet command now diagnoses passing function or method values as arguments to Printf, such as when passing f where f() was intended.
+
+TODO: ADD EXAMPLE
+
+* Gccgo
+
+The release schedules for the GCC and Go projects do not coincide.
+
+GCC release 5 contains the Go 1.4 version of gccgo.
+
+The next release, GCC 6, will have the Go 1.5 version of gccgo.
+
+Due to release scheduling, it is likely that Go 1.6 will not be in a GCC release until GCC 7.
+
 * Minor standard library changes
 
-- The archive/tar package's implementation corrects many bugs in rare corner cases of the file format. One visible change is that the Reader type's Read method now presents the content of special file types as being empty, returning io.EOF immediately.
+As well as the big improvements mentioned above, the standard library received many bug fixes and minor improvements.
 
-- In the archive/zip package, the Reader type now has a RegisterDecompressor method, and the Writer type now has a RegisterCompressor method, enabling control over compression options for individual zip files. These take precedence over the pre-existing global RegisterDecompressor and RegisterCompressor functions.
+This section highlights a few of these changes.
 
-- The bufio package's Scanner type now has a Buffer method, to specify an initial buffer and maximum buffer size to use during scanning. This makes it possible, when needed, to scan tokens larger than MaxScanTokenSize. Also for the Scanner, the package now defines the ErrFinalToken error value, for use by split functions to abort processing or to return a final empty token.
+Read more
 
-- The compress/flate package has deprecated its ReadError and WriteError error implementations. In Go 1.5 they were only rarely returned when an error was encountered; now they are never returned, although they remain defined for compatibility.
+- [[https://tip.golang.org/doc/go1.6#minor_library_changes][Go 1.6 release notes]]
 
-- The compress/flate, compress/gzip, and compress/zlib packages now report io.ErrUnexpectedEOF for truncated input streams, instead of io.EOF.
-The crypto/cipher package now overwrites the destination buffer in the event of a GCM decryption failure. This is to allow the AESNI code to avoid using a temporary buffer.
+* archive/tar
+
+Joe Tsai has put a lot of effort into the archive/tar package, correcting many bugs in rare corner cases of the file format.
+
+One visible change is that the Reader type's Read method now presents the content of special file types as being empty, returning io.EOF immediately.
+
+* bufio
+
+The bufio package's Scanner type now has a Buffer method, to specify an initial buffer and maximum buffer size to use during scanning.
+
+This makes it possible, when needed, to scan tokens larger than MaxScanTokenSize.
+
+Also for the Scanner, the package now defines the ErrFinalToken error value, for use by split functions to abort processing or to return a final empty token.
+
 
 - The crypto/tls package has a variety of minor changes. It now allows Listen to succeed when the Config has a nil Certificates, as long as the GetCertificate callback is set, it adds support for RSA with AES-GCM cipher suites, and it adds a RecordHeaderError to allow clients (in particular, the net/http package) to report a better error when attempting a TLS connection to a non-TLS server.
 
@@ -334,21 +328,25 @@ The crypto/cipher package now overwrites the destination buffer in the event of 
 
 - The debug/dwarf and debug/elf packages together add support for compressed DWARF sections. User code needs no updating: the sections are decompressed automatically when read.
 The debug/elf package adds support for general compressed ELF sections. User code needs no updating: the sections are decompressed automatically when read. However, compressed Section's do not support random access: they have a nil ReaderAt field.
-The encoding/asn1 package now exports tag and class constants useful for advanced parsing of ASN.1 structures.
-Also in the encoding/asn1 package, Unmarshal now rejects various non-standard integer and length encodings.
 The encoding/base64 package's Decoder has been fixed to process the final bytes of its input. Previously it processed as many four-byte tokens as possible but ignore the remainder, up to three bytes. The Decoder therefore now handles inputs in unpadded encodings (like RawURLEncoding) correctly, but it also rejects inputs in padded encodings that are truncated or end with invalid bytes, such as trailing spaces.
 The encoding/json package now checks the syntax of a Number before marshaling it, requiring that it conforms to the JSON specification for numeric values. As in previous releases, the zero Number (an empty string) is marshaled as a literal 0 (zero).
+
 The encoding/xml package's Marshal function now supports a cdata attribute, such as chardata but encoding its argument in one or more <![CDATA[ ... ]]> tags.
 Also in the encoding/xml package, Decoder's Token method now reports an error when encountering EOF before seeing all open tags closed, consistent with its general requirement that tags in the input be properly matched. To avoid that requirement, use RawToken.
+
 The fmt package now allows any integer type as an argument to Printf's * width and precision specification. In previous releases, the argument to * was required to have type int.
 Also in the fmt package, Scanf can now scan hexadecimal strings using %X, as an alias for %x. Both formats accept any mix of upper- and lower-case hexadecimal. TODO: Keep?
-The image and The image/color packages add NYCbCrA and NYCbCrA types, to support Y'CbCr images with non-premultiplied alpha.
+
 The io package's MultiWriter implementation now implements a WriteString method, for use by WriteString.
+
 In the math/big package, Int adds Append and Text methods to give more control over printing.
 Also in the math/big package, Float now implements encoding.TextMarshaler and encoding.TextUnmarshaler, allowing it to be serialized in a natural form by the encoding/json and encoding/xml packages.
 Also in the math/big package, Float's Append method now supports the special precision argument -1. As in strconv.ParseFloat, precision -1 means to use the smallest number of digits necessary such that Parse reading the result into a Float of the same precision will yield the original value.
+
 The math/rand package adds a Read function, and likewise Rand adds a Read method. These make it easier to generate pseudorandom test data. Note that, like the rest of the package, these should not be used in cryptographic settings; for such purposes, use the crypto/rand package instead.
+
 The net package's ParseMAC function now accepts 20-byte IP-over-InfiniBand (IPoIB) link-layer addresses.
+
 Also in the net package, there have been a few changes to DNS lookups. First, the DNSError error implementation now implements Error, and in particular its new IsTemporary method returns true for DNS server errors. Second, DNS lookup functions such as LookupAddr now return rooted domain names (with a trailing dot) on Plan 9 and Windows, to match the behavior of Go on Unix systems. TODO: Third, lookups satisfied from /etc/hosts now add a trailing dot as well, so that looking up 127.0.0.1 typically now returns “localhost.” not “localhost”. This is arguably a mistake but is not yet fixed. See https://golang.org/issue/13564.
 The net/http package has a number of minor additions beyond the HTTP/2 support already discussed. First, the FileServer now sorts its generated directory listings by file name. Second, the Client now allows user code to set the Expect: 100-continue header (see Transport.ExpectContinueTimeout). Third, there are four new error codes from RFC 6585: StatusPreconditionRequired (428), StatusTooManyRequests (429), StatusRequestHeaderFieldsTooLarge (431), and StatusNetworkAuthenticationRequired (511). Fourth, the implementation and documentation of CloseNotifier has been substantially changed. The Hijacker interface now works correctly on connections that have previously been used with CloseNotifier. The documentation now describes when CloseNotifier is expected to work.
 Also in the net/http package, there are a few changes related to the handling of a Request data structure with its Method field set to the empty string. An empty Method field has always been documented as an alias for "GET" and it remains so. However, Go 1.6 fixes a few routines that did not treat an empty Method the same as an explicit "GET". Most notably, in previous releases Client followed redirects only with Method set explicitly to "GET"; in Go 1.6 Client also follows redirects for the empty Method. Finally, NewRequest accepts a method argument that has not been documented as allowed to be empty. In past releases, passing an empty method argument resulted in a Request with an empty Method field. In Go 1.6, the resulting Request always has an initialized Method field: if its argument is an empty string, NewRequest sets the Method field in the returned Request to "GET".
