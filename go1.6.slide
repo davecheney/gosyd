@@ -68,33 +68,33 @@ Go 1.6 supports the following CPU architectures:
 
 - Intel (386 and amd64), arm (ARMv5, v6, v7), arm64, 64 bit PowerPC (big and little endian), 64 bit MIPS (big and little endian)
 - s390x (IBM Z series) planned for Go 1.7
-- RISC-V may be on the horizon.
+- RISC-V may be on the horizon
 
 * Cross compilation
 
-You can cross compile from any platform to any other platform like this
+As of Go 1.5, you no longer need to 'bless' your Go install before cross compiling—it just works*.
 
     # cross compile from your machine to Windows
     env GOOS=windows go build $YOURPACKAGE 
 
 This works with the binary release from the [[https://golang.org/dl/][golang.org]].
 
-As of Go 1.5, you no longer need to 'bless' your Go install before cross compiling—it just works.
-
 Read more:
 
 - [[http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5][Cross compilation with Go 1.5]]
 - [[https://medium.com/@rakyll/go-1-5-cross-compilation-488092ba44ec#.7wrgy0a5s][Go 1.5: Cross compilation]]
 
+_*_Unless_your_code_uses_cgo_
+
 * Garbage collector improvements
 
-Go 1.5 introduced the low latency garbage collector.
+Go 1.5 introduced a low latency garbage collector.
 
 The new collector trades throughput for reduced latency.
 
 Allocations pay (in terms of time) a little up front to reduce the time taken to clean up later, this reduces the overall time the gc has to stop the world.
 
-For Go 1.6 a lot of work went into optimising and tuning the gc, enabling far larger heaps to be managed within the 10ms latency goal.
+For Go 1.6, a lot of work went into optimising and tuning the gc, enabling far larger heaps to be managed within the 10ms latency goal.
 
 * Go 1.5
 
@@ -127,13 +127,21 @@ Read more
 
 The major change is the definition of rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector.
 
-Go and C may share memory allocated by Go when a pointer to that memory is passed to C as part of a cgo call, provided that the memory itself contains no pointers to Go-allocated memory, and provided that C does not retain the pointer after the call returns.
+Go and C may share memory allocated by Go when
+
+- a pointer to that memory is passed to C as part of a cgo call,
+- and provided that the memory itself contains no pointers to Go-allocated memory,
+- and provided that C does not retain the pointer after the call returns.
 
 These rules are checked by the runtime during program execution: if the runtime detects a violation, it prints a diagnosis and crashes the program.
 
 The checks can be disabled by setting the environment variable `GODEBUG=cgocheck=0`, but note that disabling the checks will typically only lead to more mysterious failure modes.
 
 Fixing the code in question should be strongly preferred over turning off the checks.
+
+* Sharing pointers between Go and C (cont.)
+
+.play go1.6/cgo.go
 
 * Compiler Toolchain
 
