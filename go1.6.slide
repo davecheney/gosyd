@@ -329,29 +329,9 @@ This makes it possible, when needed, to scan tokens larger than MaxScanTokenSize
 
 Also for the Scanner, the package now defines the ErrFinalToken error value, for use by split functions to abort processing or to return a final empty token.
 
-- The debug/dwarf and debug/elf packages together add support for compressed DWARF sections. User code needs no updating: the sections are decompressed automatically when read.
-The debug/elf package adds support for general compressed ELF sections. User code needs no updating: the sections are decompressed automatically when read. However, compressed Section's do not support random access: they have a nil ReaderAt field.
-The encoding/base64 package's Decoder has been fixed to process the final bytes of its input. Previously it processed as many four-byte tokens as possible but ignore the remainder, up to three bytes. The Decoder therefore now handles inputs in unpadded encodings (like RawURLEncoding) correctly, but it also rejects inputs in padded encodings that are truncated or end with invalid bytes, such as trailing spaces.
-The encoding/json package now checks the syntax of a Number before marshaling it, requiring that it conforms to the JSON specification for numeric values. As in previous releases, the zero Number (an empty string) is marshaled as a literal 0 (zero).
+TODO: ADD EXAMPLE
 
-The encoding/xml package's Marshal function now supports a cdata attribute, such as chardata but encoding its argument in one or more <![CDATA[ ... ]]> tags.
-Also in the encoding/xml package, Decoder's Token method now reports an error when encountering EOF before seeing all open tags closed, consistent with its general requirement that tags in the input be properly matched. To avoid that requirement, use RawToken.
-
-The fmt package now allows any integer type as an argument to Printf's * width and precision specification. In previous releases, the argument to * was required to have type int.
-Also in the fmt package, Scanf can now scan hexadecimal strings using %X, as an alias for %x. Both formats accept any mix of upper- and lower-case hexadecimal. TODO: Keep?
-
-
-In the math/big package, Int adds Append and Text methods to give more control over printing.
-Also in the math/big package, Float now implements encoding.TextMarshaler and encoding.TextUnmarshaler, allowing it to be serialized in a natural form by the encoding/json and encoding/xml packages.
-Also in the math/big package, Float's Append method now supports the special precision argument -1. As in strconv.ParseFloat, precision -1 means to use the smallest number of digits necessary such that Parse reading the result into a Float of the same precision will yield the original value.
-
-The math/rand package adds a Read function, and likewise Rand adds a Read method. These make it easier to generate pseudorandom test data. Note that, like the rest of the package, these should not be used in cryptographic settings; for such purposes, use the crypto/rand package instead.
-
-The net package's ParseMAC function now accepts 20-byte IP-over-InfiniBand (IPoIB) link-layer addresses.
-
-Also in the net package, there have been a few changes to DNS lookups. First, the DNSError error implementation now implements Error, and in particular its new IsTemporary method returns true for DNS server errors. Second, DNS lookup functions such as LookupAddr now return rooted domain names (with a trailing dot) on Plan 9 and Windows, to match the behavior of Go on Unix systems. TODO: Third, lookups satisfied from /etc/hosts now add a trailing dot as well, so that looking up 127.0.0.1 typically now returns “localhost.” not “localhost”. This is arguably a mistake but is not yet fixed. See https://golang.org/issue/13564.
-
-* net/http
+* net/* changes
 
 The net/http package has a number of minor additions beyond the HTTP/2 support already discussed.
 
@@ -360,13 +340,28 @@ The net/http package has a number of minor additions beyond the HTTP/2 support a
 - There are four new error codes from RFC 6585: StatusPreconditionRequired (428), StatusTooManyRequests (429), StatusRequestHeaderFieldsTooLarge (431), and StatusNetworkAuthenticationRequired (511).
 - The implementation and documentation of CloseNotifier has been substantially changed. The Hijacker interface now works correctly on connections that have previously been used with CloseNotifier. The documentation now describes when CloseNotifier is expected to work.
 
-Also in the net/http package, there are a few changes related to the handling of a Request data structure with its Method field set to the empty string. An empty Method field has always been documented as an alias for "GET" and it remains so. However, Go 1.6 fixes a few routines that did not treat an empty Method the same as an explicit "GET". Most notably, in previous releases Client followed redirects only with Method set explicitly to "GET"; in Go 1.6 Client also follows redirects for the empty Method. Finally, NewRequest accepts a method argument that has not been documented as allowed to be empty. In past releases, passing an empty method argument resulted in a Request with an empty Method field. In Go 1.6, the resulting Request always has an initialized Method field: if its argument is an empty string, NewRequest sets the Method field in the returned Request to "GET".
+* net/* changes (cont.)
+- The net/http/httptest package's ResponseRecorder now initializes a default Content-Type header using the same content-sniffing algorithm as in http.Server.
+- The net/url package's Parse is now stricter and more spec-compliant regarding the parsing of host names. For example, spaces in the host name are no longer accepted.
+- net/url.Error type now implements net.Error.
 
-The net/http/httptest package's ResponseRecorder now initializes a default Content-Type header using the same content-sniffing algorithm as in http.Server.
+* GODEBUG=netdns
 
-The net/url package's Parse is now stricter and more spec-compliant regarding the parsing of host names. For example, spaces in the host name are no longer accepted.
+The `net` package implements two DNS resolvers
 
-Also in the net/url package, the Error type now implements net.Error.
+- cgo based resolver which uses the platform's dns resolver
+- the so called "pure Go" DNS resolver
+
+The former is the default when not cross compiling, the latter is enabled exclusively when cross compiling.
+
+For "native" builds, you can control this setting with
+
+    export GODEBUG=netdns=go    # force pure Go resolver
+    export GODEBUG=netdns=cgo   # force cgo resolver
+
+Read more
+
+- [[https://golang.org/pkg/net/#hdr-Name_Resolution][Name resolution section]] of the `net` package documentation. 
 
 * os
 
