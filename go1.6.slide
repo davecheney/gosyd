@@ -67,6 +67,9 @@ Go 1.6 supports the following operating systems:
 Go 1.6 supports the following CPU architectures:
 
 - Intel (386 and amd64), arm (ARMv5, v6, v7), arm64, 64 bit PowerPC (big and little endian), 64 bit MIPS (big and little endian)
+
+In the future:
+
 - s390x (IBM Z series) planned for Go 1.7
 - RISC-V may be on the horizon
 
