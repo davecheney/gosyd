@@ -46,7 +46,7 @@ Almost all Go programs are expected to continue to compile and run as before.
 
 Go was announced as an open source project November 10th, 2009.
 
-Releases occur on a ~6 month cadance with several bug fix point releases between each major release.
+Releases occur on a ~6 month cadence with several bug fix point releases between each major release.
 
 Release timeline:
 
@@ -225,7 +225,7 @@ If you're used to doing
 
 Be aware that vendored packages, like
 
-   $GOPATH/github.com/you/repo/vendor/github.com/dependecy/repo
+   $GOPATH/github.com/you/repo/vendor/github.com/them/repo
 
 Will match the go tool glob operator `...`, and probably cause the test to fail.
 
@@ -296,7 +296,7 @@ A program can then overlay that template with new definitions for the "title" an
 
 The go vet command now diagnoses passing function or method values as arguments to Printf, such as when passing f where f() was intended.
 
-TODO: ADD EXAMPLE
+.code go1.6/vet.go
 
 * Gccgo
 

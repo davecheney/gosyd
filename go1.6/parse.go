@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
-	_, err := time.Parse(time.RFC822, "29 Feb 15 15:04 MST")
-	fmt.Println(err)
+	const date = "2015-02-29T10:04:00+10:00"
+	_, err := time.Parse(time.RFC3339, date)
+	fmt.Println(err) // no Feb 29 last year, even in Australia
 }
