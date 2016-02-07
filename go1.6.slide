@@ -38,7 +38,7 @@ The latest Go release, version 1.6, arrives six months after 1.5.
 
 Most of its changes are in the implementation of the language, runtime, and libraries. There are no changes to the language specification.
 
-As always, the release maintains the [[http://tip.golang.org/doc/go1compat.html][Go 1 compatability guarentee]].
+As always, the release maintains the [[http://tip.golang.org/doc/go1compat.html][Go 1 compatibility guarantee]].
 
 Almost all Go programs are expected to continue to compile and run as before.
 
