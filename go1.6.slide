@@ -336,7 +336,7 @@ This makes it possible, when needed, to scan tokens larger than MaxScanTokenSize
 Also for the Scanner, the package now defines the ErrFinalToken error value, for use by split functions to abort processing or to return a final empty token.
 
 * bufio (example)
-.code go1.6/scan.go
+.code go1.6/scan.go /START OMIT/,/END OMIT/
 
 * net/* changes
 

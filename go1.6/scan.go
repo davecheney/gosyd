@@ -1,12 +1,13 @@
-package main // OMIT
+package main 
 
-import ( // OMIT
-	"bufio" // OMIT
-	"bytes" // OMIT
-	"fmt"   // OMIT
-	"os"    // OMIT
-) // OMIT
+import ( 
+	"bufio" 
+	"bytes"
+	"fmt" 
+	"os" 
+) 
 
+// START OMIT
 func main() {
 	var b bytes.Buffer
 	b.Write([]byte("Go 1.6 is awesome\n"))
@@ -29,3 +30,4 @@ func main() {
 		fmt.Fprintln(os.Stderr, "reading long lines", err)
 	}
 }
+// END OMIT
