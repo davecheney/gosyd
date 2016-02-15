@@ -298,6 +298,9 @@ The go vet command now diagnoses passing function or method values as arguments 
 
 .code go1.6/vet.go
 
+    % go tool vet -all go1.6/vet.go
+    go1.6/vet.go:6: arg r.UserAgent in printf call is a function value, not a function call
+
 * Gccgo
 
 The release schedules for the GCC and Go projects do not coincide.
