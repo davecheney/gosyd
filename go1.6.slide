@@ -222,9 +222,25 @@ It can be disabled explicitly by setting the GO15VENDOREXPERIMENT environment va
 
 The most likely problem caused by enabling vendoring by default happens in source trees containing an existing directory named vendor that does not expect to be interpreted according to new vendoring semantics. In this case, the simplest fix is to rename the directory to anything other than vendor and update any affected import paths.
 
-* Vendoring example
+* How does it work?
 
-TODO: WRITE EXAMPLE
+        /home/user/gocode/
+            src/
+                server-one/
+                    main.go            (import "github.com/gorilla/mux")
+                server-two/
+                    main.go            (import "github.com/gorilla/mux")
+                    vendor/
+                        github.com/
+                            gorilla/
+                                mux/
+                                    ...
+
+`server-one` uses the `mux` package in `$GOPATH/src/github.com/gorilla/mux`.
+
+`server-two` uses the `mux` package in `vendor`.
+
+* Vendoring demo
 
 * Vendored code matches ./...
 
@@ -280,6 +296,12 @@ The new algorithm does choose a different ordering than before for values that c
 The definition of `Sort` makes no guarantee about the final order of _equal_values_, the new behavior may break programs that expect a specific order.
 
 Such programs should either refine their Less implementations to report the desired order or should switch to `sort.Stable`, which preserves the original input order of equal values.
+
+* sort.Sort example
+
+.play go1.6/sort.go /START OMIT/,/END OMIT/
+
+_Change_sort.Sort_to_sort.Stable_and_observe_the_effect_on_the_Bills_
 
 * Stripping whitespace with text/template
 
