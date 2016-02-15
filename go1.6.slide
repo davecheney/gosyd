@@ -26,7 +26,7 @@ TO RUN THEM LOCALLY YOU WILL NEED GO 1.6BETA1 OR LATER
 
 Today (Feb 17th) is an attempt at a release party for Go 1.6 involving as many Go user groups as possible.
 
-There are NNN Go user groups taking part, you can find [[https://github.com/golang/go/wiki/Go-1.6-release-party#whos-involved][a list of them here]].
+There are 44 Go user groups taking part, you can find [[https://github.com/golang/go/wiki/Go-1.6-release-party#whos-involved][a list of them here]].
 
 This presentation is based _heavily_ on the [[http://tip.golang.org/doc/go1.6][official Go 1.6 release notes]].
 
@@ -128,9 +128,9 @@ Read more
 
 * Sharing pointers between Go and C
 
-The major change is the definition of rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector.
+The major change to cgo in Go 1.6 is the rules for sharing Go pointers with C code, to ensure that such C code can coexist with Go's garbage collector, have been clarified.
 
-Go and C may share memory allocated by Go when
+Go and C may share memory allocated by Go when:
 
 - a pointer to that memory is passed to C as part of a cgo call,
 - and provided that the memory itself contains no pointers to Go-allocated memory,
@@ -182,6 +182,10 @@ If the runtime detects this condition, it prints a diagnosis and crashes the pro
 
 The best way to find out more about the problem is to run the program under the race detector.
 
+* map panic example
+
+.play go1.6/map.go /START OMIT/,/END OMIT/
+
 * Panic messages are shorter by default
 
 For program-ending panics, the runtime now by default prints _only_the_stack_of_the_running_goroutine_, not all existing goroutines.
@@ -196,9 +200,15 @@ Read more:
 
 - [[http://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables#GOTRACEBACK][A whirlwind tour of Go’s runtime environment variables]]
 
+* short panic message example
+
+.play go1.6/crashy.go /START OMIT/,/END OMIT/
+
 * Windows timer resolution
 
 On Windows, Go programs in Go 1.5 and earlier forced the global Windows timer resolution to 1ms at startup by calling `timeBeginPeriod(1)`.
+
+This makes Windows users' batteries sad.
 
 Go 1.6 no longer needs this for good scheduler performance, and changing the global timer resolution caused problems on some systems, so the call has been removed.
 
