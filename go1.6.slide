@@ -273,12 +273,6 @@ Such interoperation useful mainly for testing a program containing suspect C or 
 
 This should probably be considered _experimental_ and only available on linux/amd64.
 
-* Shared library support
-
-TODO: SHOW EXAMPLE OF COMPILING USING SHARED LIBRARIES
-
-_note:_ dynamic loading of code at run time (plugins) is still not supported.
-
 * Performance
 
 On average the programs in the Go 1 benchmark suite run a few percent faster in Go 1.6 than they did in Go 1.5.
@@ -310,19 +304,6 @@ It is now possible to trim spaces around template actions, which can make templa
 A minus sign at the beginning of an action says to trim space before the action, and a minus sign at the end of an action says to trim space after the action.
 
 .play go1.6/template.go
-
-* {{block}} action
-
-The new {{block}} action, combined with allowing redefinition of named templates, provides a simple way to define pieces of a template that can be replaced in different instantiations.
-
-For example, the template below defines the basic formatting of a web page:
-
-    <title>{{block "title"}}Page Title{{end}}</title>
-    <body>
-    <h1>{{template "title"}}</h1>
-    {{block "page"}}Main text{{end}}
-
-A program can then overlay that template with new definitions for the "title" and "page" blocks to reuse the formatting for another page.
 
 * Go vet command
 
