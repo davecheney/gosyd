@@ -6,14 +6,6 @@ YOUR NAME
 @YOURTWITTER
 http://talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide
 
-* DRAFT
-
-THIS IS A DRAFT PRESENTATION
-
-Source: [[https://github.com/davecheney/gosyd/blob/master/go1.6.slide]]
-
-PLEASE SEND CORRECTIONS / ADDITIONS BEFORE FEB 17
-
 * DEMONSTRATIONS
 
 THE CODE SAMPLES IN THIS SLIDE DECK REQUIRE GO 1.6
@@ -26,11 +18,17 @@ TO RUN THEM LOCALLY YOU WILL NEED GO 1.6BETA1 OR LATER
 
 Today (Feb 17th) is an attempt at a release party for Go 1.6 involving as many Go user groups as possible.
 
-There are 44 Go user groups taking part, you can find [[https://github.com/golang/go/wiki/Go-1.6-release-party#whos-involved][a list of them here]].
+There are 50 Go user groups taking part, you can find [[https://github.com/golang/go/wiki/Go-1.6-release-party#whos-involved][a list of them here]].
 
 This presentation is based _heavily_ on the [[http://tip.golang.org/doc/go1.6][official Go 1.6 release notes]].
 
 This presentation contains lots of links to further reading. You can find it online, [[http://talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide][talks.godoc.org/github.com/davecheney/gosyd/go1.6.slide]]
+
+* Artwork
+
+.image go1.6/Go_release_party_1.6_wide.png 500 _
+
+_Credit_: [[https://groups.google.com/d/msg/go-meetup-organisers/5FFI9Azo2TE/_lyJU_xMEgAJ][Frédéric Menez / Golang Paris meetup]].
 
 * Go 1.6
 
@@ -182,7 +180,7 @@ If the runtime detects this condition, it prints a diagnosis and crashes the pro
 
 The best way to find out more about the problem is to run the program under the race detector.
 
-* map panic example
+* maps panic if you misuse them (example)
 
 .play go1.6/map.go /START OMIT/,/END OMIT/
 
@@ -200,7 +198,7 @@ Read more:
 
 - [[http://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables#GOTRACEBACK][A whirlwind tour of Go’s runtime environment variables]]
 
-* short panic message example
+* Panic messages are shorter by default (example)
 
 .play go1.6/crashy.go /START OMIT/,/END OMIT/
 
@@ -220,7 +218,7 @@ Go 1.6 keeps the vendoring support, no longer considered experimental, and enabl
 
 It can be disabled explicitly by setting the GO15VENDOREXPERIMENT environment variable to 0. Go 1.7 will remove support for the environment variable.
 
-The most likely problem caused by enabling vendoring by default happens in source trees containing an existing directory named vendor that does not expect to be interpreted according to new vendoring semantics. In this case, the simplest fix is to rename the directory to anything other than vendor and update any affected import paths.
+The most likely problem caused by enabling vendoring by default happens in source trees containing an existing directory named `vendor` that does not expect to be interpreted according to new vendoring semantics. In this case, the simplest fix is to rename the directory to anything other than vendor and update any affected import paths.
 
 * How does it work?
 
@@ -236,24 +234,26 @@ The most likely problem caused by enabling vendoring by default happens in sourc
                                 mux/
                                     ...
 
-`server-one` uses the `mux` package in `$GOPATH/src/github.com/gorilla/mux`.
+`server-one` uses the `mux` package in
 
-`server-two` uses the `mux` package in `vendor`.
+	$GOPATH/src/github.com/gorilla/mux
 
-* Vendoring demo
+`server-two` uses the `mux` package in
 
-* Vendored code matches ./...
+	$GOPATH/src/github.com/gorilla/mux/vendor/github.com/gorilla/mux
+
+* Vendoring (demo)
+
+* Vendoring gotchas
+
+Vendored code matches ./...
 
 If you're used to doing
 
    % cd $GOPATH/github.com/you/repo
    % go test ./...
 
-Be aware that vendored packages, like
-
-   $GOPATH/github.com/you/repo/vendor/github.com/them/repo
-
-Will match the go tool glob operator `...`, and probably cause the test to fail.
+The go tool glob operator `...`, _also_matches_ things in your `vendor/` directory.
 
 The workaround is to filter out vendored packages by name
 
@@ -338,7 +338,7 @@ Read more
 
 Joe Tsai has put a lot of effort into the archive/tar package, correcting many bugs in rare corner cases of the file format.
 
-One visible change is that the Reader type's Read method now presents the content of special file types as being empty, returning io.EOF immediately.
+One visible change is that the Reader type's Read method now presents the content of special file types as being empty, returning `io.EOF` immediately.
 
 * bufio
 
@@ -349,7 +349,8 @@ This makes it possible, when needed, to scan tokens larger than MaxScanTokenSize
 Also for the Scanner, the package now defines the ErrFinalToken error value, for use by split functions to abort processing or to return a final empty token.
 
 * bufio (example)
-.code go1.6/scan.go /START OMIT/,/END OMIT/
+
+.play go1.6/scan.go /START OMIT/,/END OMIT/
 
 * net/* changes
 
@@ -363,7 +364,7 @@ The net/http package has a number of minor additions beyond the HTTP/2 support a
 * net/* changes (cont.)
 - The net/http/httptest package's ResponseRecorder now initializes a default Content-Type header using the same content-sniffing algorithm as in http.Server.
 - The net/url package's Parse is now stricter and more spec-compliant regarding the parsing of host names. For example, spaces in the host name are no longer accepted.
-- net/url.Error type now implements net.Error.
+- net/url.Error type now implements `net.Error` to provide `Temporary` and `Timeout` behaviours.
 
 * GODEBUG=netdns
 
@@ -385,15 +386,13 @@ Read more
 
 * os
 
-The os package's IsExist, IsNotExist, and IsPermission now return correct results when inquiring about an SyscallError.
+The os package's `IsExist`, `IsNotExist`, and `IsPermission` now return correct results when inquiring about a `SyscallError`.
 
-This is useful if you have an unknown error value and want
+On Unix-like systems, when a write to `os.Stdout` or `os.Stderr` fails due to a broken pipe error, the program will raise a `SIGPIPE` signal. By default this will cause the program to exit; this may be changed by calling the `os/signal.Notify` function for `syscall.SIGPIPE`. 
 
-On Unix-like systems, when a write to os.Stdout or os.Stderr (more precisely, an os.File opened for file descriptor 1 or 2) fails due to a broken pipe error, the program will raise a SIGPIPE signal. By default this will cause the program to exit; this may be changed by calling the os/signal Notify function for syscall.SIGPIPE. A write to a broken pipe on a file descriptor other 1 or 2 will simply return syscall.EPIPE (possibly wrapped in os.PathError and/or os.SyscallError) to the caller.
+In Go 1.6 a write to a broken pipe on a file descriptor other 1 or 2 will simply return `syscall.EPIPE` (possibly wrapped in `os.PathError` and/or `os.SyscallError`) to the caller.
 
 The old behavior of raising an uncatchable SIGPIPE signal after 10 consecutive writes to a broken pipe no longer occurs.
-
-TODO: WRITE EXAMPLE
 
 * regexp
 
@@ -415,3 +414,11 @@ The time package's Parse function has always rejected any day of month larger th
 In Go 1.6, Parse now also rejects February 29 in non-leap years, February 30, February 31, April 31, June 31, September 31, and November 31.
 
 .play go1.6/parse.go
+
+* Go 1.6
+
+.link https://golang.org/dl/
+
+.image go1.6/GoLaunch_Front.png 440 _
+
+_Credit_: [[http://www.meetup.com/golangsf/events/226090306/][iron.io / GoSF Meetup]].
