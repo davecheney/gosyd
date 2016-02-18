@@ -240,7 +240,7 @@ The most likely problem caused by enabling vendoring by default happens in sourc
 
 `server-two` uses the `mux` package in
 
-	$GOPATH/src/github.com/gorilla/mux/vendor/github.com/gorilla/mux
+	$GOPATH/src/server-two/vendor/github.com/gorilla/mux
 
 * Vendoring (demo)
 
