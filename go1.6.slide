@@ -166,7 +166,7 @@ Go 1.5 added an alternative syntax using a single argument that is itself a name
 
 In Go 1.5 the old syntax was still accepted, after printing a warning suggesting use of the new syntax instead. Go 1.6 continues to accept the old syntax and print the warning. Go 1.7 will remove support for the old syntax.
 
-* maps panic if you misuse them
+* maps throw if you misuse them
 
 The runtime has added lightweight, best-effort detection of concurrent misuse of maps.
 
@@ -180,7 +180,7 @@ If the runtime detects this condition, it prints a diagnosis and crashes the pro
 
 The best way to find out more about the problem is to run the program under the race detector.
 
-* maps panic if you misuse them (example)
+* maps throw if you misuse them (example)
 
 .play go1.6/map.go /START OMIT/,/END OMIT/
 
